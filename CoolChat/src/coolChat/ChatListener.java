@@ -1,9 +1,15 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * ChatListener
+ * 
+ * V 1.0
+ *
+ * 2018-01-17
+ * 
+ * Copyright notice
  */
 package coolChat;
+
+import java.io.BufferedReader;
 
 /**
  *
@@ -11,4 +17,13 @@ package coolChat;
  */
 public class ChatListener extends Thread{
     
+    private BufferedReader in;
+    
+    public void GroupChatListener(){
+        
+    }   
+    
+    public void run(){
+        
+    }
 }

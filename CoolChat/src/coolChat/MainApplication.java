@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * MainApplication
+ * 
+ * V 1.0
+ *
+ * 2018-01-17
+ * 
+ * Copyright notice
  */
 package coolChat;
 

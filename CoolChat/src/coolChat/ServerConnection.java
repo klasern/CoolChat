@@ -1,5 +1,5 @@
 /*
- * ClientConnection
+ * ServerConnection
  * 
  * V 1.0
  *
