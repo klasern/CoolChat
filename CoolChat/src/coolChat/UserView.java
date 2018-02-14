@@ -10,5 +10,5 @@ package coolChat;
  * @author klasern
  */
 public class UserView {
-    
+    test
 }
