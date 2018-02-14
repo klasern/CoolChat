@@ -1,5 +1,5 @@
 /*
- * UserView
+ * ServerThread
  * 
  * V 1.0
  *

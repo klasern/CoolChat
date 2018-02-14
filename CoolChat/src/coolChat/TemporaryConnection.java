@@ -1,5 +1,5 @@
 /*
- * UserView
+ * TemporaryConnection
  * 
  * V 1.0
  *
