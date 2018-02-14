@@ -6,6 +6,8 @@
 package coolChat;
 
 import java.awt.event.*;
+import java.net.*;
+import java.util.*;
 import javax.swing.*;
 /**
  *
@@ -14,7 +16,12 @@ import javax.swing.*;
 public class UserView extends JFrame implements ActionListener {
     
     private JTabbedPane myTabbedPane;
-    
+    private List<Chat> chats;
+    private List<Socket> clients;
+    private List<ClientConnection> connectedTo;
+    private List<ServerConnection> connections;
+    private JButton connectButton;
+    private ServerThread serverThread;
     
     
 
