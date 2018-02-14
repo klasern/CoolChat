@@ -9,6 +9,8 @@
  */
 package coolChat;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.*;
 import java.net.*;
 import java.util.*;
@@ -21,10 +23,11 @@ public class UserView extends JFrame implements ActionListener {
 
     /*GUI*/
     private JTabbedPane myTabbedPane;
+    private JPanel buttonJPanel;
     private JButton connectButton;
     private JComboBox kickComboBox;
-    private JComboBox disconnectComboBox;
-
+    private JButton disconnectButton;
+    
     /*Chat objects*/
     private List<Chat> chats;
 
@@ -33,13 +36,33 @@ public class UserView extends JFrame implements ActionListener {
     private List<ClientConnection> connectedTo;
     private List<ServerConnection> connections;
     private ServerThread serverThread;
-    public static Boolean groupChatActive;
+    public static Boolean groupChatActive = false;
 
     /**
      * Creates the UserView.
      */
     public UserView() {
-
+       this.setPreferredSize(new Dimension(800, 800));
+               
+       myTabbedPane = new JTabbedPane();
+       buttonJPanel = new JPanel();
+       connectButton = new JButton("Connect");
+       disconnectButton = new JButton("Disconnect");
+       
+       myTabbedPane.setPreferredSize(new Dimension(600, 600));
+       this.add(myTabbedPane, BorderLayout.CENTER);
+       
+       buttonJPanel.add(connectButton);
+       buttonJPanel.add(disconnectButton);
+       
+       this.add(buttonJPanel, BorderLayout.NORTH);
+       
+       pack();
+       setVisible(true);
+              
+       serverThread = new ServerThread(this);
+       serverThread.start();
+       
     }
 
     /**

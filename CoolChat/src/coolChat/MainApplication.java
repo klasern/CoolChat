@@ -11,4 +11,7 @@ package coolChat;
  */
 public class MainApplication {
     
+    public static void main(String[] args){
+        UserView myUserView = new UserView();
+    }
 }

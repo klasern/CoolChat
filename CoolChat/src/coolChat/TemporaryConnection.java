@@ -21,15 +21,17 @@ public class TemporaryConnection extends Thread {
     private BufferedReader in;
     private PrintWriter out;
     private UserView myUserView;
+    private Socket clientSocket;
 
     /**
      * Gets pointer to UserView and creates a new thread.
      *
      * @param clientSocketIn
-     * @param myUserView
+     * @param userViewIn
      */
-    public TemporaryConnection(Socket clientSocketIn, UserView myUserView) {
-
+    public TemporaryConnection(Socket clientSocketIn, UserView userViewIn) {
+        myUserView = userViewIn;
+        clientSocket = clientSocketIn;
     }
 
     /**
@@ -70,7 +72,7 @@ public class TemporaryConnection extends Thread {
      * delete connection.
      */
     public void run() {
-
+        System.out.println("Test");
     }
 
 }
