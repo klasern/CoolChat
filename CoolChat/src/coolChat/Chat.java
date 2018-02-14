@@ -11,12 +11,7 @@ import javax.swing.*;
  *
  * @author klasern
  */
-public class UserView extends JFrame implements ActionListener {
-    
-    private JTabbedPane myTabbedPane;
-    
-    
-    
+public class Chat extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
