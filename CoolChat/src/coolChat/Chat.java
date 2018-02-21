@@ -155,13 +155,13 @@ public class Chat extends JPanel implements ActionListener {
         
     }
 
-    public static void main(String[] args) {
-        JFrame myFrame = new JFrame();
-        Chat myChat = new Chat();
-        myFrame.add(myChat);
-        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        myFrame.pack();
-        myFrame.setVisible(true);
-    }
+//    public static void main(String[] args) {
+//        JFrame myFrame = new JFrame();
+//        Chat myChat = new Chat();
+//        myFrame.add(myChat);
+//        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        myFrame.pack();
+//        myFrame.setVisible(true);
+//    }
 
 }
