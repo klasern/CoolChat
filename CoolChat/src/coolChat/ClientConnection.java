@@ -30,8 +30,14 @@ public class ClientConnection extends Thread {
      * @param port
      * @param userViewIn 
      */
-    public ClientConnection(String hosAdress, int port, UserView userViewIn) {
+    public ClientConnection(String hostAdress, int port, UserView userViewIn) {
         myUserView = userViewIn;
+        
+        /* INSÅG ATT VI BÅDE MÅSTE KUNNA SKRIVA OCH TA EMOT MEDDELANDEN NÄR SOM HELST
+        , GÖR DÄRFÖR SOM I SERVERCONNECTION MED ATT SKAPA EN CHATLISTENER SOM LYSSNAR EFTER MEDDELANDEN
+        */
+       
+        
     }
        
     /**
