@@ -73,6 +73,13 @@ public class TemporaryConnection extends Thread {
      */
     public void run() {
         System.out.println("Test");
+        
+        /* Vill egentligen få upp en meny där man väljer vad man vill göra
+        och en av ovanstående funktioner körs beroende på vad man svarar
+        */
+        ServerConnection server = new ServerConnection(clientSocket, 
+                myUserView);
+        
     }
 
 }
