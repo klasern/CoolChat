@@ -124,6 +124,10 @@ public class Chat extends JPanel implements ActionListener {
 
     }
 
+    public void paintTheCanvas(String textIn) {
+        appendToPane(name, textIn, textColor);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == colorButton) {
@@ -142,17 +146,20 @@ public class Chat extends JPanel implements ActionListener {
             SendMessage(myTextField.getText());
         }
     }
-    
+
     /* Sends message when ENTER or Sendbutton i pressed */
     private void SendMessage(String message) {
         // Lägg till: När vi är server så skickar vi iväg meddelande till andra
-            // När vi är client, skicka enbart
-            //if(server != null){
-            appendToPane(name, message, textColor);
+        // När vi är client, skicka enbart
+        if (server != null) {
+            server.sendMessage(message);
             myTextField.setText("");
+        }
+        else {
+            client.sendMessage(message);
+            myTextField.setText("");
+        }
 
-            //}
-        
     }
 
 //    public static void main(String[] args) {
@@ -163,5 +170,4 @@ public class Chat extends JPanel implements ActionListener {
 //        myFrame.pack();
 //        myFrame.setVisible(true);
 //    }
-
 }

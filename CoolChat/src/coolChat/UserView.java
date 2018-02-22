@@ -170,7 +170,7 @@ public class UserView extends JFrame implements ActionListener {
                 
 
                 clientConnects.add(connection);
-                connection.start();
+                //connection.start();
 
             } catch (NumberFormatException nfe) {
                 System.out.println("Dålig Port");

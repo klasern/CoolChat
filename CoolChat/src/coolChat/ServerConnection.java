@@ -25,6 +25,7 @@ public class ServerConnection extends Thread {
     private List<PrintWriter> outPut;
     private List<Socket> clientSockets;
     private UserView myUserView;
+    private Chat myChat;
 
     public boolean isGroupChat = false;
 
@@ -38,7 +39,8 @@ public class ServerConnection extends Thread {
         inListen = new ArrayList<ChatListener>();
         outPut = new ArrayList<PrintWriter>();
         clientSockets = new ArrayList<Socket>();
-        myUserView = userViewIn;
+        myUserView = userViewIn;        
+        
 
         clientSockets.add(clientSocketIn);
 
@@ -52,6 +54,9 @@ public class ServerConnection extends Thread {
        
         /* Create a ChatListener corresponding to the first connected client */
         addChatListener(clientSocketIn);
+        
+        myChat = new Chat(this);
+        myUserView.addChat(myChat);
          
     }
 
@@ -65,6 +70,7 @@ public class ServerConnection extends Thread {
             out.println(messageOut);
         }
         System.out.println(messageOut);
+        myChat.paintTheCanvas(messageOut);
     }
 
     public final void addChatListener(Socket clientSocketIn) {
