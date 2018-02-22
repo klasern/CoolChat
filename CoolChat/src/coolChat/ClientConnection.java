@@ -51,8 +51,8 @@ public class ClientConnection extends Thread {
             System.exit(1);
         }
        
-        
-        
+        myChat = new Chat(this);
+        myUserView.addChat(myChat);        
        
         
     }
@@ -68,6 +68,7 @@ public class ClientConnection extends Thread {
     
     public void writeMessage(String message) {
         System.out.println(message);
+        myChat.paintTheCanvas(message);
     }
     /**
      * 
