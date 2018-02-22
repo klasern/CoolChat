@@ -12,6 +12,8 @@ package coolChat;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Establish connection with a client which connects to the server of this
@@ -47,10 +49,10 @@ public class ServerConnection extends Thread {
             System.out.println("getOutputStream failed: " + e);
             System.exit(1);  //TA BORT SENARE
         }
-        
-        
+       
         /* Create a ChatListener corresponding to the first connected client */
         addChatListener(clientSocketIn);
+         
     }
 
     /**
@@ -66,11 +68,26 @@ public class ServerConnection extends Thread {
     }
 
     public final void addChatListener(Socket clientSocketIn) {
-        inListen.add(new ChatListener(clientSocketIn, this));
+        ChatListener listener = new ChatListener(clientSocketIn, this);
+        inListen.add(listener);
+        listener.start();
     }
 
     public void run() {
         // Behöver denna ens vara en Thread eller runnable??
+        
+        /* Test om denna måste vara tråd eller ej */
+        // Anslut stdIn till terminalen
+	BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+        String userInput;                 
+        try {
+            // LÃ¤s in frÃ¥n terminalen och skicka till servern:
+            while ((userInput = stdIn.readLine()) != null) {
+                sendMessage(userInput);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ServerConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     // Vill ha en metod för att lägga till i gruppchatten

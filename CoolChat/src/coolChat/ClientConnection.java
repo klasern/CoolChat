@@ -11,6 +11,8 @@ package coolChat;
 
 import java.io.*;
 import java.net.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Used to establish a connection with a server.
@@ -39,6 +41,7 @@ public class ClientConnection extends Thread {
             System.out.println("Connected to:" + hostAddress);
             out = new PrintWriter(mySocket.getOutputStream(), true);
             inListen = new ChatListener(mySocket, this);
+            inListen.start();
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host.\n" + e);
             System.exit(1);
@@ -49,9 +52,7 @@ public class ClientConnection extends Thread {
         }
        
         
-        /* INSÅG ATT VI BÅDE MÅSTE KUNNA SKRIVA OCH TA EMOT MEDDELANDEN NÄR SOM HELST
-        , GÖR DÄRFÖR SOM I SERVERCONNECTION MED ATT SKAPA EN CHATLISTENER SOM LYSSNAR EFTER MEDDELANDEN
-        */
+        
        
         
     }
@@ -60,15 +61,29 @@ public class ClientConnection extends Thread {
      * Used to send message to server which client is connected to.
      * @param messageOut 
      */
-    public void writeMessage(String message) {
-        System.out.println(message); //Senare ska texten bara skrivas ut på chattfönstret
+    public void sendMessage(String messageOut) {
+        out.println(messageOut);
+        System.out.println(messageOut); //Senare ska texten bara skrivas ut på chattfönstret
     }
     
+    public void writeMessage(String message) {
+        System.out.println(message);
+    }
     /**
      * 
      */
     public void run(){
-        
+        // Anslut stdIn till terminalen
+	BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+        String userInput;                 
+        try {
+            // LÃ¤s in frÃ¥n terminalen och skicka till servern:
+            while ((userInput = stdIn.readLine()) != null) {
+                sendMessage(userInput);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ServerConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }

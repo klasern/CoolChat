@@ -153,6 +153,7 @@ public class UserView extends JFrame implements ActionListener {
 
                 ClientConnection connection = new ClientConnection(serverIp,
                         portNr, this);
+                
 
                 clientConnects.add(connection);
 
