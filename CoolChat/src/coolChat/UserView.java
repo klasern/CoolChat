@@ -26,8 +26,8 @@ public class UserView extends JFrame implements ActionListener {
     private JTabbedPane myTabbedPane;
     private JPanel buttonJPanel;
     private JButton connectButton;
-    private JComboBox kickComboBox;
     private JButton disconnectButton;
+    private JButton kickButton;
 
     /*Chat objects*/
     private List<Chat> chats;
@@ -56,16 +56,20 @@ public class UserView extends JFrame implements ActionListener {
         buttonJPanel = new JPanel();
         connectButton = new JButton("Connect");
         disconnectButton = new JButton("Disconnect");
+        kickButton = new JButton("Kick");
 
         myTabbedPane.setPreferredSize(new Dimension(800, 800));
         this.add(myTabbedPane, BorderLayout.CENTER);
 
         buttonJPanel.add(connectButton);
         buttonJPanel.add(disconnectButton);
+        buttonJPanel.add(kickButton);
 
         this.add(buttonJPanel, BorderLayout.NORTH);
 
         connectButton.addActionListener(this);
+        disconnectButton.addActionListener(this);
+        kickButton.addActionListener(this);
 
         pack();
         setVisible(true);
@@ -82,7 +86,7 @@ public class UserView extends JFrame implements ActionListener {
      * @param chatIn
      */
     public void addChat(Chat chatIn) {
-        myTabbedPane.add(chatIn);
+        myTabbedPane.add("Chat 1", chatIn);
         chats.add(chatIn);
     }
 
@@ -119,11 +123,21 @@ public class UserView extends JFrame implements ActionListener {
         if (e.getSource() == connectButton) { //Action when pressing connectbutton
             System.out.println("ConnectButton");
             connectMessageBox();
+        } else if (e.getSource() == disconnectButton) {
+            System.out.println("disconnectButton");
+            disconnectMessageBox();
+        } else if (e.getSource() == kickButton) {
+            System.out.println("kickButton");
+            kickMessageBox();
         }
 
     }
 
-    public void connectMessageBox() {
+    /**
+     * Opens a messageox where user can input IP, and port number which it wants
+     * to connect to.
+     */
+    private void connectMessageBox() {
         JPanel myPanel = new JPanel();
         String serverIp;   //If connect will use this field
         int portNr;     //If connect will use this field
@@ -155,12 +169,61 @@ public class UserView extends JFrame implements ActionListener {
                         portNr, this);
 
                 clientConnects.add(connection);
+                connection.start();
 
             } catch (NumberFormatException nfe) {
                 System.out.println("Dålig Port");
             }
         }
 
+    }
+
+    /**
+     * Creates a disconnectMessageBox where user can choose which IP to
+     * disconnect from.
+     */
+    private void disconnectMessageBox() {
+        JPanel myPanel = new JPanel();
+
+        String[] test = {"Anders", "Klas", "Ok", "Test"}; //Lägg in IPs i ARRAYN      
+
+        JComboBox<String> disconnectBox = new JComboBox<>(test);
+
+        String[] options = {"OK", "Cancel"};
+        String title = "Title";
+
+        int selection = JOptionPane.showOptionDialog(null, disconnectBox, title,
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
+                options[0]);
+
+        if (selection == 0) { // Om OK ta ut det valda objektet ur comboboxen och se till att disconnecta från clienten med den IPn
+            Object selectedDisconnect = disconnectBox.getSelectedItem();
+            System.out.println(selectedDisconnect);
+        }
+
+    }
+
+    /**
+     * A messagebox where user can decide which client to kick.
+     */
+    private void kickMessageBox() { //Eventuell kodupprepning som kan fixas med disconnectbox
+        JPanel myPanel = new JPanel();
+
+        String[] test = {"Anders", "Klas", "Ok", "Test"}; //Lägg in IPs i ARRAYN      
+
+        JComboBox<String> kickBox = new JComboBox<>(test);
+
+        String[] options = {"OK", "Cancel"};
+        String title = "Title";
+
+        int selection = JOptionPane.showOptionDialog(null, kickBox, title,
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
+                options[0]);
+
+        if (selection == 0) { // Om OK ta ut det valda objektet ur comboboxen och se till att disconnecta från clienten med den IPn
+            Object selectedDisconnect = kickBox.getSelectedItem();
+            System.out.println(selectedDisconnect);
+        }
     }
 
 }
