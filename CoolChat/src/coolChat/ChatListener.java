@@ -23,18 +23,31 @@ public class ChatListener extends Thread{
     private BufferedReader in;
     private String message;
     private ServerConnection server;
-    private Socket clientSocket;
+    private ClientConnection client;
+    private Socket theSocket;
     
-    public ChatListener(Socket clientSocketIn, ServerConnection serverIn){
-        clientSocket = clientSocketIn;
+    public ChatListener(Socket socketIn, ServerConnection serverIn){
+        theSocket = socketIn;
         server = serverIn;
         try{
 	    in = new BufferedReader(new InputStreamReader(
-	            clientSocket.getInputStream()));
+	            theSocket.getInputStream()));
 	}catch(IOException e){
 	    System.out.println("getInputStream failed: " + e);
         }
-    }   
+    }
+    
+    public ChatListener(Socket socketIn, ClientConnection clientIn) {
+        theSocket = socketIn;
+        client = clientIn;
+        try{
+	    in = new BufferedReader(new InputStreamReader(
+	            theSocket.getInputStream()));
+	}catch(IOException e){
+	    System.out.println("getInputStream failed: " + e);
+        }
+        
+    }
     
     public void run(){
         while(true){
@@ -45,7 +58,11 @@ public class ChatListener extends Thread{
 		    System.exit(1);       //STÄNGER NER NÄR EN STÄNGER NER
 		}
 		System.out.println("Recieved: " + message);
-		server.sendMessage(message);
+                if (server != null) {
+                    server.sendMessage(message);
+                } else {
+                    client.writeMessage(message);
+                }
 	    }catch(IOException e){
 		System.out.println("readLine failed: " + e);
 		System.exit(1);

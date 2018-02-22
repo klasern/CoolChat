@@ -55,13 +55,14 @@ public class ServerConnection extends Thread {
 
     /**
      * Sends message to all clients connected to this server.
-     *
+     * 
      * @param messageOut
      */
     public synchronized void sendMessage(String messageOut) {
         for (PrintWriter out : outPut) {
             out.println(messageOut);
         }
+        System.out.println(messageOut);
     }
 
     public final void addChatListener(Socket clientSocketIn) {

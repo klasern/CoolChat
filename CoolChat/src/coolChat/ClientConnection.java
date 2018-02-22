@@ -23,15 +23,31 @@ public class ClientConnection extends Thread {
 
     private Chat myChat;
     private UserView myUserView;
+    private ChatListener inListen;
 
     /**
      * 
-     * @param hosAdress
+     * @param hostAddress
      * @param port
      * @param userViewIn 
      */
-    public ClientConnection(String hostAdress, int port, UserView userViewIn) {
+    public ClientConnection(String hostAddress, int port, UserView userViewIn) {
         myUserView = userViewIn;
+        
+        try {
+            mySocket = new Socket(hostAddress, port);
+            System.out.println("Connected to:" + hostAddress);
+            out = new PrintWriter(mySocket.getOutputStream(), true);
+            inListen = new ChatListener(mySocket, this);
+        } catch (UnknownHostException e) {
+            System.err.println("Don't know about host.\n" + e);
+            System.exit(1);
+        } catch (IOException e) {
+            System.err.println("Couldn't get I/O for "
+                               + "the connection to host.\n" + e);
+            System.exit(1);
+        }
+       
         
         /* INSÅG ATT VI BÅDE MÅSTE KUNNA SKRIVA OCH TA EMOT MEDDELANDEN NÄR SOM HELST
         , GÖR DÄRFÖR SOM I SERVERCONNECTION MED ATT SKAPA EN CHATLISTENER SOM LYSSNAR EFTER MEDDELANDEN
@@ -44,8 +60,8 @@ public class ClientConnection extends Thread {
      * Used to send message to server which client is connected to.
      * @param messageOut 
      */
-    public void sendMessage(String messageOut) {
-        
+    public void writeMessage(String message) {
+        System.out.println(message); //Senare ska texten bara skrivas ut på chattfönstret
     }
     
     /**
