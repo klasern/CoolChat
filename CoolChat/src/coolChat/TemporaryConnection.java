@@ -79,6 +79,7 @@ public class TemporaryConnection extends Thread {
         */
         ServerConnection server = new ServerConnection(clientSocket, 
                 myUserView);
+        server.start();
         
     }
 
