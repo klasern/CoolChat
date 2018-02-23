@@ -119,6 +119,7 @@ public class Chat extends JPanel implements ActionListener {
         try {
             document.insertString(document.getLength(), nameIn + ": "
                     + msg + "\n", style);
+            chatTextPane.setCaretPosition(chatTextPane.getDocument().getLength());
         } catch (BadLocationException e) {
         }
 

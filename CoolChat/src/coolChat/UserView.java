@@ -35,9 +35,7 @@ public class UserView extends JFrame implements ActionListener {
     /* Connections */
     private List<Socket> clients;
     private List<ClientConnection> clientConnects;
-    private List<ServerConnection> serverConnects;
     private ServerThread serverThread;
-    public static Boolean groupChatActive = false;
 
     /**
      * Creates the UserView.
@@ -47,7 +45,7 @@ public class UserView extends JFrame implements ActionListener {
         chats = new ArrayList<>();
         clients = new ArrayList<>();
         clientConnects = new ArrayList<>();
-        serverConnects = new ArrayList<>();
+        //serverConnects = new ArrayList<>();
 
         /*Creates GUI*/
         this.setPreferredSize(new Dimension(1000, 1000));
@@ -191,7 +189,7 @@ public class UserView extends JFrame implements ActionListener {
         JComboBox<String> disconnectBox = new JComboBox<>(test);
 
         String[] options = {"OK", "Cancel"};
-        String title = "Title";
+        String title = "Disconnect User";
 
         int selection = JOptionPane.showOptionDialog(null, disconnectBox, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
@@ -215,7 +213,7 @@ public class UserView extends JFrame implements ActionListener {
         JComboBox<String> kickBox = new JComboBox<>(test);
 
         String[] options = {"OK", "Cancel"};
-        String title = "Title";
+        String title = "Kick User";
 
         int selection = JOptionPane.showOptionDialog(null, kickBox, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
