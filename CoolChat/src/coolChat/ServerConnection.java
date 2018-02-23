@@ -27,7 +27,10 @@ public class ServerConnection extends Thread {
     private UserView myUserView;
     private Chat myChat;
 
-    public boolean isGroupChat = false;
+    private static List<ServerConnection> serverConnects = new ArrayList<>();
+
+    public static Boolean groupChatActive = false;
+    private boolean isGroupChat = false;
 
     /**
      * Adds pointer to UserView and clientsocket.
@@ -39,30 +42,53 @@ public class ServerConnection extends Thread {
         inListen = new ArrayList<ChatListener>();
         outPut = new ArrayList<PrintWriter>();
         clientSockets = new ArrayList<Socket>();
-        myUserView = userViewIn;        
-        
+        myUserView = userViewIn;
 
         clientSockets.add(clientSocketIn);
+        serverConnects.add(this);
 
-        try {
-            outPut.add(new PrintWriter(
-                    clientSocketIn.getOutputStream(), true));
-        } catch (IOException e) {
-            System.out.println("getOutputStream failed: " + e);
-            System.exit(1);  //TA BORT SENARE
-        }
-       
-        /* Create a ChatListener corresponding to the first connected client */
-        addChatListener(clientSocketIn);
-        
         myChat = new Chat(this);
         myUserView.addChat(myChat);
-         
+
+        /* Create a ChatListener corresponding to the first connected client */
+        addChatListener(clientSocketIn);
+
+    }
+
+    /**
+     * Constructor for groupchat.
+     *
+     * @param clientSocketIn
+     * @param userViewIn
+     * @param groupChatIn
+     */
+    public ServerConnection(Socket clientSocketIn, UserView userViewIn,
+            boolean groupChatIn) {
+        this(clientSocketIn, userViewIn);
+        isGroupChat = groupChatIn;
+    }
+
+    /**
+     * Returns if serversocket is groupchat or not.
+     *
+     * @return
+     */
+    public boolean isGroupChat() {
+        return isGroupChat;
+    }
+
+    /**
+     * Return all created serverConnections.
+     *
+     * @return
+     */
+    public static List<ServerConnection> getServerConnections() {
+        return serverConnects;
     }
 
     /**
      * Sends message to all clients connected to this server.
-     * 
+     *
      * @param messageOut
      */
     public synchronized void sendMessage(String messageOut) {
@@ -74,6 +100,14 @@ public class ServerConnection extends Thread {
     }
 
     public final void addChatListener(Socket clientSocketIn) {
+        try {
+            outPut.add(new PrintWriter(
+                    clientSocketIn.getOutputStream(), true));
+        } catch (IOException e) {
+            System.out.println("getOutputStream failed: " + e);
+            System.exit(1);  //TA BORT SENARE
+        }
+
         ChatListener listener = new ChatListener(clientSocketIn, this);
         inListen.add(listener);
         listener.start();
@@ -81,11 +115,11 @@ public class ServerConnection extends Thread {
 
     public void run() {
         // Behöver denna ens vara en Thread eller runnable??
-        
+
         /* Test om denna måste vara tråd eller ej */
         // Anslut stdIn till terminalen
-	BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-        String userInput;                 
+        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+        String userInput;
         try {
             // LÃ¤s in frÃ¥n terminalen och skicka till servern:
             while ((userInput = stdIn.readLine()) != null) {
