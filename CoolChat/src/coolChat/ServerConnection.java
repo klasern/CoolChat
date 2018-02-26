@@ -135,7 +135,7 @@ public class ServerConnection extends Thread {
     }
 
     public final void addChatListener(Socket clientSocketIn) {
-        try {sendMessage();
+        try {
             outPut.add(new PrintWriter(
                     clientSocketIn.getOutputStream(), true));
             ChatListener listener = new ChatListener(clientSocketIn, this);

@@ -105,6 +105,7 @@ public class ClientConnection extends Thread {
 
     public void writeMessage(String message) {
         ChatTextLine messageIn = XmlHandler.readXml(message);
+        
         myChat.appendToPane(messageIn.getName(), messageIn.getMessage(), 
                 messageIn.getColor());
     }
