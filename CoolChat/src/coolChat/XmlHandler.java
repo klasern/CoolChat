@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Iterator;
+import java.util.jar.Attributes;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.stream.XMLEventReader;
@@ -28,17 +29,12 @@ import javax.xml.stream.events.XMLEvent;
  * @author Anders
  */
 public final class XmlHandler {
-
-    private static final String[] html = {"&quot;", "&amp;", "&lt;", "&gt;",
-        "&Auml;", "&Aring;", "&Ouml;", "&auml;", "&aring;", "&ouml;"};
-    private static final String[] specialCharacters = {"\"", "&", "<", ">",
-        "Ä", "Å", "Ö", "ä", "å", "ö"};
-
+    
     private XmlHandler() {
         throw new IllegalStateException("Do not instantiate this class.");
     }
 
-    public static ChatTextLine readXml(String xmlMessage) { 
+    public static ChatTextLine readXml(String xmlMessage) {
         String name = null;
         String message = "";
         String color = null;
@@ -48,6 +44,9 @@ public final class XmlHandler {
         XMLInputFactory factory = XMLInputFactory.newInstance();
 
         boolean bText = false;
+        
+        Attribute nextName;
+        Attribute nextColor;
 
         try {
             XMLEventReader eventReader
@@ -62,12 +61,27 @@ public final class XmlHandler {
                         String qName = startElement.getName().getLocalPart();
 
                         if (qName.equalsIgnoreCase("message")) {
-                            Iterator<Attribute> attributes = startElement.getAttributes();
-                            name = attributes.next().getValue();
-                            
+                            Iterator<Attribute> attributes = 
+                                    startElement.getAttributes();
+                                while (name == null && attributes.hasNext()) {
+                                    nextName = attributes.next();
+                                    if (nextName.getName().toString()
+                                            .equals("sender")){
+                                        name = nextName.getValue();
+                                    }
+                                }
+                                
+                          System.out.println(name);
                         } else if (qName.equalsIgnoreCase("text")) {
-                            Iterator<Attribute> attributes = startElement.getAttributes();
-                            color = attributes.next().getValue();
+                            Iterator<Attribute> attributes = 
+                                    startElement.getAttributes();
+                            while (color == null && attributes.hasNext()) {
+                                    nextColor = attributes.next();
+                                    if (nextColor.getName().toString()  //Stilguiden??
+                                            .equals("color")){
+                                        color = nextColor.getValue();
+                                    }
+                                }
                             
                             bText = true;
                         }
@@ -85,14 +99,18 @@ public final class XmlHandler {
             }
             /* convert RGB to color-object */
             textColor = Color.decode(color);
-            output = new ChatTextLine(name, message, textColor, isBroken);
         } catch (XMLStreamException ex) {
+            name = null;
+            message = null;
+            textColor = null;
             isBroken = true;
             ex.printStackTrace();
+        } finally { 
+            output = new ChatTextLine(name, message, textColor, isBroken);
+            return output; // If isBroken, still need to return 
         }
-        return output;
+        
     }
-    
 
     public static String writeXml(String name, String textColor, String text) {
         String messageOut = null;
@@ -131,6 +149,7 @@ public final class XmlHandler {
         }
         return messageOut;
     }
+
     
     public static String disconnectMessage(String nameIn){
         return "<message sender=\"" + nameIn + "\"><disconnect>"
@@ -140,9 +159,9 @@ public final class XmlHandler {
     public static void main(String[] args) {
 //        //String message = "<name attribute=\"value\">content</name>";
 //        //String message = "<class><student rollno = \"393\"><firstname>dinkar</firstname><lastname>kad</lastname><nickname>dinkar</nickname><marks>85</marks></student><student rollno = \"493\"><firstname>Vaneet</firstname><lastname>Gupta</lastname><nickname>vinni</nickname><marks>95</marks></student><student rollno = \"593\"><firstname>jasvir</firstname><lastname>singn</lastname><nickname>jazz</nickname><marks>90</marks></student></class>";
-        String message = "<message sender=\"Anders\"><text color=\"#000000\">Hej &amp; <fetstil>på</fetstil> dig</text></message>";
+        String message = "<message extra=\"plz ignore\" sender=\"Anders\" ><text exxxtra=\"plz iiiignore\" color=\"#000000\">Hej &amp; <fetstil>på</fetstil> dig</text></message>";
 //        //XmlHandler.readXml(message);
-          //String message = "<?xml version=\"1.0\" ?><?xml version=\"1.0\" ?><message sender=\"Anders\"><text color=\"#000000\">Hej på dig</text></message>";
+        //String message = "<?xml version=\"1.0\" ?><?xml version=\"1.0\" ?><message sender=\"Anders\"><text color=\"#000000\">Hej på dig</text></message>";
 //        String message = writeXml("Anders", "#RRGGBB", "Hej på dig");
 //        String message1 = writeXml("Anders", "#RRGGBB", "Hej dddpå dig");
 //        String message2 = writeXml("Anders", "#RRGGBB", "Hej på asdaddig");
@@ -150,20 +169,7 @@ public final class XmlHandler {
 //        System.out.println(message1);
 //        System.out.println(message2);
 //        System.out.println(readXml(message));
-          System.out.println(readXml(message).getColor());
-        
+        System.out.println(readXml(message).getColor());
+
     }
 }
-
-///* If message has HTML codes, it is converted to normal text */
-//    private String convertText(String messageIn) {
-//        String messageText = null;
-//        int index = messageIn.indexOf("&");
-//        while (index >= 0) {
-//            System.out.println(index);
-//            
-//            index = messageIn.indexOf("&", index + 1);
-//        }
-//
-//        return messageText;
-//    }
