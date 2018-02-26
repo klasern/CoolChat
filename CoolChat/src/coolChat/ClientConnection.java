@@ -101,12 +101,12 @@ public class ClientConnection extends Thread {
      */
     public void sendMessage(String messageOut) {
         out.println(messageOut);
-        System.out.println(messageOut); //Senare ska texten bara skrivas ut på chattfönstret
     }
 
     public void writeMessage(String message) {
-        System.out.println(message);
-        myChat.paintTheCanvas(message);
+        ChatTextLine messageIn = XmlHandler.readXml(message);
+        myChat.appendToPane(messageIn.getName(), messageIn.getMessage(), 
+                messageIn.getColor());
     }
     
     /**
