@@ -104,6 +104,7 @@ public class ServerConnection extends Thread {
         return myChat;
     }
 
+
     /**
      * Removes client and its printwriter.
      *
@@ -121,15 +122,20 @@ public class ServerConnection extends Thread {
      * @param messageOut
      */
     public synchronized void sendMessage(String messageOut) {
+        /* Sends the xml-string to all clients */
         for (PrintWriter out : outPut) {
             out.println(messageOut);
         }
-        System.out.println(messageOut);
-        myChat.paintTheCanvas(messageOut);
+        /* Create a chattextline-object that contains information to write on 
+        our own screen
+        */
+        ChatTextLine message = XmlHandler.readXml(messageOut);
+        myChat.appendToPane(message.getName(), message.getMessage(), 
+                message.getColor());
     }
 
     public final void addChatListener(Socket clientSocketIn) {
-        try {
+        try {sendMessage();
             outPut.add(new PrintWriter(
                     clientSocketIn.getOutputStream(), true));
             ChatListener listener = new ChatListener(clientSocketIn, this);

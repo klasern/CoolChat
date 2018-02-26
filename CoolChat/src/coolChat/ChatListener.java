@@ -79,7 +79,6 @@ public class ChatListener extends Thread {
                     System.out.println("Client disconnect!");
                     break;       //STÄNGER NER NÄR EN STÄNGER NER
                 }
-                System.out.println("Recieved: " + message);
                 if (server != null) {
                     server.sendMessage(message);
                 } else {
