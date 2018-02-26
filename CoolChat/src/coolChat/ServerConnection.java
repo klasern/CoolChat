@@ -85,25 +85,39 @@ public class ServerConnection extends Thread {
     public static List<ServerConnection> getServerConnections() {
         return serverConnects;
     }
-    
+
     /**
      * Return all ChatListener which listens to this server.
-     * @return 
+     *
+     * @return
      */
-    public List<ChatListener> getChatListeners(){
+    public List<ChatListener> getChatListeners() {
         return inListen;
     }
 
     /**
      * Return chat.
-     * @return 
+     *
+     * @return
      */
-    public Chat getChat(){
+    public Chat getChat() {
         return myChat;
     }
-    
+
+
     /**
-     * Sends message to all clients connected to this server.
+     * Removes client and its printwriter.
+     *
+     * @param socketIn
+     */
+    public void removeClient(Socket socketIn) {
+        int removeIndex = clientSockets.indexOf(socketIn);
+        clientSockets.remove(removeIndex);
+        outPut.remove(removeIndex);
+    }
+
+    /**
+     * Sends message to all clients connected to this server. theSocket
      *
      * @param messageOut
      */
@@ -121,17 +135,17 @@ public class ServerConnection extends Thread {
     }
 
     public final void addChatListener(Socket clientSocketIn) {
-        try {
+        try {sendMessage();
             outPut.add(new PrintWriter(
                     clientSocketIn.getOutputStream(), true));
+            ChatListener listener = new ChatListener(clientSocketIn, this);
+            inListen.add(listener);
+            listener.start();
         } catch (IOException e) {
             System.out.println("getOutputStream failed: " + e);
-            System.exit(1);  //TA BORT SENARE
+            //System.exit(1);  //TA BORT SENARE
         }
 
-        ChatListener listener = new ChatListener(clientSocketIn, this);
-        inListen.add(listener);
-        listener.start();
     }
 
     public void run() {

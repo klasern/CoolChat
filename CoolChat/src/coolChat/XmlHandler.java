@@ -131,6 +131,10 @@ public final class XmlHandler {
         }
         return messageOut;
     }
+    
+    public static String disconnectMessage(String nameIn){
+        return "<message sender=\"Anders\"> + nameIn + ";
+    }
 
     public static void main(String[] args) {
 //        //String message = "<name attribute=\"value\">content</name>";
