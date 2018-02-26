@@ -108,6 +108,13 @@ public class ClientConnection extends Thread {
         System.out.println(message);
         myChat.paintTheCanvas(message);
     }
+    
+    /**
+     * Send disconect message
+     */
+    public void sendDisconnectMessage(){
+        
+    }
 
     /**
      *
