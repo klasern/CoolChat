@@ -197,7 +197,7 @@ public class UserView extends JFrame implements ActionListener {
         String[] options = {"OK", "Cancel"};
         String title = "Disconnect User";
 
-        int selection = JOptionPane.showOptionDialog(null, disconnectBox, title,
+        int selection = JOptionPane.showOptionDialog(this, disconnectBox, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
                 options, options[0]);
 
@@ -233,7 +233,7 @@ public class UserView extends JFrame implements ActionListener {
         String[] options = {"OK", "Cancel"};
         String title = "Kick User";
 
-        int selection = JOptionPane.showOptionDialog(null, kickBox, title,
+        int selection = JOptionPane.showOptionDialog(this, kickBox, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
                 options, options[0]);
 
@@ -247,6 +247,7 @@ public class UserView extends JFrame implements ActionListener {
                 removeChat(kickServer.getChat());
             }
 
+            kickServer.sendDisconnectMessage((ChatListener) selectedKick);
             ((ChatListener) selectedKick).closeConnection();
 
         }
