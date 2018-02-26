@@ -43,6 +43,7 @@ public class Chat extends JPanel implements ActionListener {
     /* The username and chatcolor for this specific chat. */
     private String name;
     private Color textColor;
+    private String color; //Color as RGB string
 
     /* The chat exchanges data with EITHER a ServerConnectio or a 
     ClientConnection */
@@ -68,6 +69,7 @@ public class Chat extends JPanel implements ActionListener {
         /* Set default name and color */
         name = "Petter-Niklas";
         textColor = Color.magenta;
+        color = "#"+Integer.toHexString(textColor.getRGB()).substring(2);
 
         /* Add to bottompanel */
         myTextField.setPreferredSize(new Dimension(600, 30));
@@ -113,7 +115,7 @@ public class Chat extends JPanel implements ActionListener {
      * @param msg
      * @param c
      */
-    private void appendToPane(String nameIn, String msg, Color c) {
+    public void appendToPane(String nameIn, String msg, Color c) {
         StyleConstants.setForeground(style, c);
 
         try {
@@ -135,6 +137,7 @@ public class Chat extends JPanel implements ActionListener {
             Color newColor = JColorChooser.showDialog(this, "Change Button Background",
                     textColor);
             textColor = newColor;
+            color = "#"+Integer.toHexString(textColor.getRGB()).substring(2);
         } else if (e.getSource() == sendButton) {
             SendMessage(myTextField.getText());
         } else if (e.getSource() == nameButton) {
@@ -152,12 +155,13 @@ public class Chat extends JPanel implements ActionListener {
     private void SendMessage(String message) {
         // Lägg till: När vi är server så skickar vi iväg meddelande till andra
         // När vi är client, skicka enbart
+        String messageOut = XmlHandler.writeXml(name, color, message);
         if (server != null) {
-            server.sendMessage(message);
+            server.sendMessage(messageOut);
             myTextField.setText("");
         }
         else {
-            client.sendMessage(message);
+            client.sendMessage(messageOut);
             myTextField.setText("");
         }
 
