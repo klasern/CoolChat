@@ -16,8 +16,9 @@ public class ChatTextLine {
     private String name;
     private String message;
     private Color textColor;
+    private Boolean brokenXml;
 
-    public ChatTextLine(String nameIn, String messageIn, Color colorIn) {
+    public ChatTextLine(String nameIn, String messageIn, Color colorIn, Boolean broken) {
         this.name = nameIn;
         this.message = messageIn;
         this.textColor = colorIn;
@@ -33,6 +34,10 @@ public class ChatTextLine {
     
     public Color getColor(){
         return this.textColor;
+    }
+    
+    public boolean isBroken(){
+        return this.brokenXml;
     }
 
 }
