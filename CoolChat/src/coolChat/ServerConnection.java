@@ -85,7 +85,24 @@ public class ServerConnection extends Thread {
     public static List<ServerConnection> getServerConnections() {
         return serverConnects;
     }
+    
+    /**
+     * Return all ChatListener which listens to this server.
+     * @return 
+     */
+    public List<ChatListener> getChatListeners(){
+        return inListen;
+    }
 
+    /**
+     * Return chat.
+     * @return 
+     */
+    public Chat getChat(){
+        return myChat;
+    }
+    
+    
     /**
      * Sends message to all clients connected to this server.
      *
