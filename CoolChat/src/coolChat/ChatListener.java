@@ -50,7 +50,19 @@ public class ChatListener extends Thread {
         }
 
     }
+    
+    /**
+     * Returns the socket.
+     * @return 
+     */
+    public Socket getSocket(){
+        return theSocket;
+    }
 
+    /**
+     * Return ServerConnection
+     * @return 
+     */
     public ServerConnection getServer() {
         return server;
     }

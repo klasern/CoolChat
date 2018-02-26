@@ -133,7 +133,8 @@ public final class XmlHandler {
     }
     
     public static String disconnectMessage(String nameIn){
-        return "<message sender=\"Anders\"> + nameIn + ";
+        return "<message sender=\"" + nameIn + "\"><disconnect>"
+                + "</disconnect></message>";
     }
 
     public static void main(String[] args) {

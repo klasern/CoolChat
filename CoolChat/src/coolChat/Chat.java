@@ -107,6 +107,14 @@ public class Chat extends JPanel implements ActionListener {
         this();
         this.client = clientIn;
     }
+    
+    /**
+     * Returns name of chat.
+     * @return 
+     */
+    public String getChatName(){
+        return name;
+    }
 
     /**
      * Adds a line of text to the chatTextPane.
