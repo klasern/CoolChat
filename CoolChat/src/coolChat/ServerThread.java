@@ -35,10 +35,19 @@ public class ServerThread extends Thread {
     }
 
     /**
-     * Used to start TemporaryConnection.
+     * Used to get correct port.
      */
-    private void startTemporaryConnection() {
-
+    private boolean startServerSocket() {
+        try {
+            port = Integer.parseInt(
+                    JOptionPane.showInputDialog(myUserView,
+                            "What port to listen to?"));
+            serverSocket = new ServerSocket(port);
+        } catch (Exception e) {
+            System.out.println("Could not listen on port: " + port);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -46,32 +55,24 @@ public class ServerThread extends Thread {
      */
     public void run() {
 
-        //Gets port to listen to.
-        port = Integer.parseInt(
-                JOptionPane.showInputDialog(myUserView, 
-                        "What port to listen to?"));
+        boolean startUp = true;
 
-        //Starts server socket
-        try {
-            serverSocket = new ServerSocket(port);
-        } catch (IOException e) {
-            System.out.println("Could not listen on port: " + port);
-            System.exit(-1);
+        while (startUp) {
+            startUp = startServerSocket();
         }
+        //Gets port to listen to.
 
         while (true) {
             Socket clientSocket = null;
             try {
                 clientSocket = serverSocket.accept();
+                Thread temporaryThread = new TemporaryConnection(clientSocket,
+                        myUserView);
+                temporaryThread.start();
             } catch (IOException e) {
                 System.out.println("Accept failed: " + port);
-                System.exit(-1);
             }
-            Thread temporaryThread = new TemporaryConnection(clientSocket, 
-                    myUserView);            
-            temporaryThread.start();            
-            
-            
+
         }
 
     }

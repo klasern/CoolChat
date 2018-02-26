@@ -77,7 +77,7 @@ public class ChatListener extends Thread {
                 message = in.readLine();
                 if (message == null) {
                     System.out.println("Client disconnect!");
-                    System.exit(1);       //STÄNGER NER NÄR EN STÄNGER NER
+                    break;       //STÄNGER NER NÄR EN STÄNGER NER
                 }
                 System.out.println("Recieved: " + message);
                 if (server != null) {
@@ -87,7 +87,7 @@ public class ChatListener extends Thread {
                 }
             } catch (IOException e) {
                 System.out.println("readLine failed: " + e);
-                System.exit(1);
+                break;
             }
         }
     }
