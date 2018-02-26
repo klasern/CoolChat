@@ -91,7 +91,7 @@ public class TemporaryConnection extends Thread {
         String title = "Establish Connection";
         String connectingIp = clientSocket.getInetAddress().toString();
 
-        int selection = JOptionPane.showOptionDialog(null,
+        int selection = JOptionPane.showOptionDialog(myUserView,
                 connectingIp + " want to connect:", title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
                 options, options[0]);

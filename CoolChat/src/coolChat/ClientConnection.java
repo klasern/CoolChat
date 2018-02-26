@@ -114,7 +114,15 @@ public class ClientConnection extends Thread {
      * Send disconect message
      */
     public void sendDisconnectMessage(){
-        
+        sendMessage(XmlHandler.disconnectMessage(myChat.getChatName()));
+        removeClient();
+    }
+    
+    /**
+     * Removes client form list o clientconnections.
+     */
+    private void removeClient(){
+        clientConnects.remove(this);
     }
 
     /**

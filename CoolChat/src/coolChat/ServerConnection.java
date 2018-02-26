@@ -104,16 +104,32 @@ public class ServerConnection extends Thread {
         return myChat;
     }
 
-
     /**
      * Removes client and its printwriter.
      *
      * @param socketIn
      */
-    public void removeClient(Socket socketIn) {
-        int removeIndex = clientSockets.indexOf(socketIn);
+    public void removeClient(ChatListener listenIn) {
+        int removeIndex = inListen.indexOf(listenIn);
+        
+        if (!isGroupChat) {
+            serverConnects.remove(this);
+        }
+        
         clientSockets.remove(removeIndex);
         outPut.remove(removeIndex);
+        inListen.remove(removeIndex);
+    }
+
+    /**
+     * Send disconnect message to kicked client and removes it from the lists.
+     * @param listenIn 
+     */
+    public void sendDisconnectMessage(ChatListener listenIn) {
+        int dcIndex = inListen.indexOf(listenIn);
+        outPut.get(dcIndex).println(
+                XmlHandler.disconnectMessage(myChat.getChatName()));
+        removeClient(listenIn);
     }
 
     /**
@@ -128,9 +144,9 @@ public class ServerConnection extends Thread {
         }
         /* Create a chattextline-object that contains information to write on 
         our own screen
-        */
+         */
         ChatTextLine message = XmlHandler.readXml(messageOut);
-        myChat.appendToPane(message.getName(), message.getMessage(), 
+        myChat.appendToPane(message.getName(), message.getMessage(),
                 message.getColor());
     }
 

@@ -150,8 +150,10 @@ public final class XmlHandler {
         return messageOut;
     }
 
-    public static String disconnectMessage(String nameIn) {
-        return "<message sender=\"Anders\"> + nameIn + ";
+    
+    public static String disconnectMessage(String nameIn){
+        return "<message sender=\"" + nameIn + "\"><disconnect>"
+                + "</disconnect></message>";
     }
 
     public static void main(String[] args) {
