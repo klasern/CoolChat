@@ -34,8 +34,10 @@ public class UserView extends JFrame implements ActionListener {
 
     /* Connections */
     private List<Socket> clients;
-    private List<ClientConnection> clientConnects;
+    //private List<ClientConnection> clientConnects;
     private ServerThread serverThread;
+
+    private int chatNr = 1;
 
     /**
      * Creates the UserView.
@@ -44,7 +46,7 @@ public class UserView extends JFrame implements ActionListener {
         /*Creates Lsits*/
         chats = new ArrayList<>();
         clients = new ArrayList<>();
-        clientConnects = new ArrayList<>();
+        //clientConnects = new ArrayList<>();
         //serverConnects = new ArrayList<>();
 
         /*Creates GUI*/
@@ -84,8 +86,9 @@ public class UserView extends JFrame implements ActionListener {
      * @param chatIn
      */
     public void addChat(Chat chatIn) {
-        myTabbedPane.add("Chat 1", chatIn);
+        myTabbedPane.add("Chat " + chatNr, chatIn);
         chats.add(chatIn);
+        chatNr += 1;
     }
 
     /**
@@ -112,8 +115,8 @@ public class UserView extends JFrame implements ActionListener {
     /**
      * Removes a chat.
      */
-    private void removeChat() {
-
+    private void removeChat(Chat chatIn) {
+        myTabbedPane.remove(chatIn);
     }
 
     @Override
@@ -165,11 +168,9 @@ public class UserView extends JFrame implements ActionListener {
 
                 ClientConnection connection = new ClientConnection(serverIp,
                         portNr, this);
-                
 
-                clientConnects.add(connection);
+                //clientConnects.add(connection);
                 //connection.start();
-
             } catch (NumberFormatException nfe) {
                 System.out.println("Dålig Port");
             }
@@ -184,20 +185,26 @@ public class UserView extends JFrame implements ActionListener {
     private void disconnectMessageBox() {
         JPanel myPanel = new JPanel();
 
-        String[] test = {"Anders", "Klas", "Ok", "Test"}; //Lägg in IPs i ARRAYN      
+        List<ClientConnection> clientConnects
+                = ClientConnection.getClientConnections();
 
-        JComboBox<String> disconnectBox = new JComboBox<>(test);
+        JComboBox<ClientConnection> disconnectBox = new JComboBox<>();
+
+        for (ClientConnection addClient : clientConnects) {
+            disconnectBox.addItem(addClient);
+        }
 
         String[] options = {"OK", "Cancel"};
         String title = "Disconnect User";
 
         int selection = JOptionPane.showOptionDialog(null, disconnectBox, title,
-                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
-                options[0]);
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+                options, options[0]);
 
         if (selection == 0) { // Om OK ta ut det valda objektet ur comboboxen och se till att disconnecta från clienten med den IPn
             Object selectedDisconnect = disconnectBox.getSelectedItem();
-            System.out.println(selectedDisconnect);
+            removeChat(((ClientConnection) selectedDisconnect).getChat());
+            ((ClientConnection) selectedDisconnect).closeConnection();
         }
 
     }
@@ -208,20 +215,38 @@ public class UserView extends JFrame implements ActionListener {
     private void kickMessageBox() { //Eventuell kodupprepning som kan fixas med disconnectbox
         JPanel myPanel = new JPanel();
 
-        String[] test = {"Anders", "Klas", "Ok", "Test"}; //Lägg in IPs i ARRAYN      
+        //String[] test = {"Anders", "Klas", "Ok", "Test"}; //Lägg in IPs i ARRAYN  
+        List<ServerConnection> servers = 
+                ServerConnection.getServerConnections();
 
-        JComboBox<String> kickBox = new JComboBox<>(test);
+        JComboBox<ChatListener> kickBox = new JComboBox<>();
+
+        for (ServerConnection addServer : servers) {
+            List<ChatListener> serverClients = addServer.getChatListeners();
+            for (ChatListener addClients : serverClients) {
+                kickBox.addItem(addClients);
+            }
+        }
 
         String[] options = {"OK", "Cancel"};
         String title = "Kick User";
 
         int selection = JOptionPane.showOptionDialog(null, kickBox, title,
-                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
-                options[0]);
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+                options, options[0]);
 
         if (selection == 0) { // Om OK ta ut det valda objektet ur comboboxen och se till att disconnecta från clienten med den IPn
-            Object selectedDisconnect = kickBox.getSelectedItem();
-            System.out.println(selectedDisconnect);
+            Object selectedKick = kickBox.getSelectedItem();
+
+            ServerConnection kickServer
+                    = ((ChatListener) selectedKick).getServer();
+
+            if (!kickServer.isGroupChat()) { //Removes chat if server is not groupchat
+                removeChat(kickServer.getChat());
+            }
+
+            ((ChatListener) selectedKick).closeConnection();
+
         }
     }
 

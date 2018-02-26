@@ -11,6 +11,7 @@ package coolChat;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +19,8 @@ import java.util.logging.Logger;
  * Used to establish a connection with a server.
  */
 public class ClientConnection extends Thread {
+
+    private static List<ClientConnection> clientConnects = new ArrayList<>();
 
     private Socket mySocket;
     private BufferedReader in;
@@ -28,14 +31,14 @@ public class ClientConnection extends Thread {
     private ChatListener inListen;
 
     /**
-     * 
+     *
      * @param hostAddress
      * @param port
-     * @param userViewIn 
+     * @param userViewIn
      */
     public ClientConnection(String hostAddress, int port, UserView userViewIn) {
         myUserView = userViewIn;
-        
+
         try {
             mySocket = new Socket(hostAddress, port);
             System.out.println("Connected to:" + hostAddress);
@@ -47,36 +50,72 @@ public class ClientConnection extends Thread {
             System.exit(1);
         } catch (IOException e) {
             System.err.println("Couldn't get I/O for "
-                               + "the connection to host.\n" + e);
+                    + "the connection to host.\n" + e);
             System.exit(1);
         }
-       
+
         myChat = new Chat(this);
-        myUserView.addChat(myChat);        
-       
-        
+        myUserView.addChat(myChat);
+
+        clientConnects.add(this);
+
     }
-       
+
+    /**
+     * Return all ClientConnections.
+     *
+     * @return
+     */
+    public static List<ClientConnection> getClientConnections() {
+        return clientConnects;
+    }
+
+    /**
+     * Returns chat object.
+     * @return 
+     */
+    public Chat getChat(){
+        return myChat;
+    }
+    
+    /**
+     * Close connection with server.
+     */
+    public void closeConnection() {
+        try {
+            mySocket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return mySocket.getInetAddress().toString();
+    }
+
     /**
      * Used to send message to server which client is connected to.
-     * @param messageOut 
+     *
+     * @param messageOut
      */
     public void sendMessage(String messageOut) {
         out.println(messageOut);
         System.out.println(messageOut); //Senare ska texten bara skrivas ut på chattfönstret
     }
-    
+
     public void writeMessage(String message) {
         System.out.println(message);
         myChat.paintTheCanvas(message);
     }
+
     /**
-     * 
+     *
      */
-    public void run(){
+    public void run() {
         // Anslut stdIn till terminalen
-	BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-        String userInput;                 
+        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+        String userInput;
         try {
             // LÃ¤s in frÃ¥n terminalen och skicka till servern:
             while ((userInput = stdIn.readLine()) != null) {
