@@ -204,6 +204,8 @@ public class UserView extends JFrame implements ActionListener {
         if (selection == 0) { // Om OK ta ut det valda objektet ur comboboxen och se till att disconnecta från clienten med den IPn
             Object selectedDisconnect = disconnectBox.getSelectedItem();
             removeChat(((ClientConnection) selectedDisconnect).getChat());
+            
+            ((ClientConnection) selectedDisconnect).sendDisconnectMessage();
             ((ClientConnection) selectedDisconnect).closeConnection();
         }
 
