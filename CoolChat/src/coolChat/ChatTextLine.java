@@ -17,11 +17,15 @@ public class ChatTextLine {
     private String message;
     private Color textColor;
     private Boolean brokenXml;
+    private Boolean disconnetMessage;
 
-    public ChatTextLine(String nameIn, String messageIn, Color colorIn, Boolean broken) {
+    public ChatTextLine(String nameIn, String messageIn, Color colorIn, 
+            Boolean broken, Boolean disconnect) {
         this.name = nameIn;
         this.message = messageIn;
         this.textColor = colorIn;
+        this.disconnetMessage = disconnect;
+        
     }
 
     public String getName() {
@@ -38,6 +42,10 @@ public class ChatTextLine {
     
     public boolean isBroken(){
         return this.brokenXml;
+    }
+    
+    public boolean isDisconnectMessage() {
+        return this.disconnetMessage;
     }
 
 }
