@@ -9,16 +9,18 @@
  */
 package coolChat;
 
+import java.awt.Color;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.*;
 
 /**
  * Used to establish a connection with a server.
  */
-public class ClientConnection extends Thread {
+public class ClientConnection {
 
     private static List<ClientConnection> clientConnects = new ArrayList<>();
 
@@ -72,18 +74,20 @@ public class ClientConnection extends Thread {
 
     /**
      * Returns chat object.
-     * @return 
+     *
+     * @return
      */
-    public Chat getChat(){
+    public Chat getChat() {
         return myChat;
     }
-    
+
     /**
      * Close connection with server.
      */
     public void closeConnection() {
         try {
             mySocket.close();
+            removeClient();
         } catch (IOException ex) {
             Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -105,41 +109,40 @@ public class ClientConnection extends Thread {
 
     public void writeMessage(String message) {
         ChatTextLine messageIn = XmlHandler.readXml(message);
-        
-        myChat.appendToPane(messageIn.getName(), messageIn.getMessage(), 
-                messageIn.getColor());
+
+        if (messageIn.isDisconnectMessage()) {
+            // messageIn.getName() + " has disconnected.";    /// Lägg till popup på kickad chat
+            JOptionPane.showMessageDialog(myChat, "Du blev kickad av " + 
+                    messageIn.getName());
+            myUserView.removeChat(myChat);
+            closeConnection();
+            removeClient();
+        } else if (!messageIn.isBroken()) {
+            myChat.appendToPane(messageIn.getName(), messageIn.getMessage(),
+                    messageIn.getColor());
+        } else {
+            myChat.appendToPane("Server", "Något fel med xmlen.",
+                    Color.BLACK);
+        }
     }
-    
+
     /**
      * Send disconect message
      */
-    public void sendDisconnectMessage(){
+    public void sendDisconnectMessage() {
         sendMessage(XmlHandler.disconnectMessage(myChat.getChatName()));
         removeClient();
     }
     
-    /**
-     * Removes client form list o clientconnections.
-     */
-    private void removeClient(){
-        clientConnects.remove(this);
+    public void sendExitMessage() {
+        sendMessage(XmlHandler.disconnectMessage(myChat.getChatName()));
     }
 
     /**
-     *
+     * Removes client form list o clientconnections.
      */
-    public void run() {
-        // Anslut stdIn till terminalen
-        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-        String userInput;
-        try {
-            // LÃ¤s in frÃ¥n terminalen och skicka till servern:
-            while ((userInput = stdIn.readLine()) != null) {
-                sendMessage(userInput);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(ServerConnection.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    private void removeClient() {
+        clientConnects.remove(this);
     }
 
 }

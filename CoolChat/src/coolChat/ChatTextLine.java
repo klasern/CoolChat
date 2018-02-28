@@ -24,6 +24,7 @@ public class ChatTextLine {
         this.name = nameIn;
         this.message = messageIn;
         this.textColor = colorIn;
+        this.brokenXml= broken;
         this.disconnetMessage = disconnect;
         
     }

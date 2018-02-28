@@ -87,12 +87,13 @@ public class ChatListener extends Thread {
         while (true) {
             try {
                 message = in.readLine();
+                System.out.println(message);
                 if (message == null) {
                     System.out.println("Client disconnect!");
                     break;       //STÄNGER NER NÄR EN STÄNGER NER
                 }
                 if (server != null) {
-                    server.sendMessage(message);
+                    server.sendMessage(message, this);
                 } else {
                     client.writeMessage(message);
                 }
