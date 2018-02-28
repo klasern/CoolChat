@@ -9,17 +9,19 @@
  */
 package coolChat;
 
+import java.awt.Color;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  * Establish connection with a client which connects to the server of this
  * client.
  */
-public class ServerConnection extends Thread {
+public class ServerConnection {
 
     private List<ChatListener> inListen;
     private List<PrintWriter> outPut;
@@ -107,15 +109,21 @@ public class ServerConnection extends Thread {
     /**
      * Removes client and its printwriter.
      *
-     * @param socketIn
+     * @param listenIn
      */
     public void removeClient(ChatListener listenIn) {
         int removeIndex = inListen.indexOf(listenIn);
-        
+
         if (!isGroupChat) {
             serverConnects.remove(this);
         }
-        
+
+        try {
+            clientSockets.get(removeIndex).close();
+        } catch (IOException ex) {
+            Logger.getLogger(ServerConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         clientSockets.remove(removeIndex);
         outPut.remove(removeIndex);
         inListen.remove(removeIndex);
@@ -123,7 +131,8 @@ public class ServerConnection extends Thread {
 
     /**
      * Send disconnect message to kicked client and removes it from the lists.
-     * @param listenIn 
+     *
+     * @param listenIn
      */
     public void sendDisconnectMessage(ChatListener listenIn) {
         int dcIndex = inListen.indexOf(listenIn);
@@ -132,22 +141,67 @@ public class ServerConnection extends Thread {
         removeClient(listenIn);
     }
 
+    public void sendExitMessage(ChatListener listenIn) {
+        int dcIndex = inListen.indexOf(listenIn);
+        outPut.get(dcIndex).println(
+                XmlHandler.disconnectMessage(myChat.getChatName()));
+
+    }
+
     /**
      * Sends message to all clients connected to this server. theSocket
      *
      * @param messageOut
+     * @param chatIn
      */
-    public synchronized void sendMessage(String messageOut) {
-        /* Sends the xml-string to all clients */
-        for (PrintWriter out : outPut) {
-            out.println(messageOut);
-        }
+    public synchronized void sendMessage(String messageOut, ChatListener chatIn) {
         /* Create a chattextline-object that contains information to write on 
         our own screen
          */
         ChatTextLine message = XmlHandler.readXml(messageOut);
-        myChat.appendToPane(message.getName(), message.getMessage(),
-                message.getColor());
+
+        if (message.isDisconnectMessage()) {
+            messageOut = message.getName() + " has disconnected.";
+            if (!isGroupChat) { 
+                JOptionPane.showMessageDialog(myChat, messageOut);
+                myUserView.removeChat(myChat);
+            }
+            removeClient(chatIn);
+        } else {
+            if (message.isBroken()) {
+                myChat.appendToPane("Server", "Något fel med xmlen.",
+                        Color.BLACK);
+            } else {
+                myChat.appendToPane(message.getName(), message.getMessage(),
+                        message.getColor());
+            }
+
+            /* Sends the xml-string to all clients */
+            for (PrintWriter out : outPut) {
+                out.println(messageOut);
+            }
+        }
+    }
+
+    /**
+     * Used when something is written from chat.
+     *
+     * @param messageOut
+     */
+    public synchronized void sendMessage(String messageOut) {
+        ChatTextLine message = XmlHandler.readXml(messageOut);
+
+        if (message.isBroken()) {
+            myChat.appendToPane("Server", "Något fel med xmlen.",
+                    Color.BLACK);
+        } else {
+            myChat.appendToPane(message.getName(), message.getMessage(),
+                    message.getColor());
+        }
+
+        for (PrintWriter out : outPut) {
+            out.println(messageOut);
+        }
     }
 
     public final void addChatListener(Socket clientSocketIn) {
@@ -162,23 +216,6 @@ public class ServerConnection extends Thread {
             //System.exit(1);  //TA BORT SENARE
         }
 
-    }
-
-    public void run() {
-        // Behöver denna ens vara en Thread eller runnable??
-
-        /* Test om denna måste vara tråd eller ej */
-        // Anslut stdIn till terminalen
-        BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-        String userInput;
-        try {
-            // LÃ¤s in frÃ¥n terminalen och skicka till servern:
-            while ((userInput = stdIn.readLine()) != null) {
-                sendMessage(userInput);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(ServerConnection.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     // Vill ha en metod för att lägga till i gruppchatten

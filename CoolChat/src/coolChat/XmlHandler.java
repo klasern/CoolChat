@@ -38,7 +38,7 @@ public final class XmlHandler {
         String name = null;
         String message = "";
         String color = null;
-        Boolean isBroken = false;
+        Boolean isBroken = true;
         Boolean disconnect = false;
         Color textColor = null;
         ChatTextLine output = null;
@@ -61,6 +61,7 @@ public final class XmlHandler {
                         StartElement startElement = event.asStartElement();
                         String qName = startElement.getName().getLocalPart();
                         if (qName.equalsIgnoreCase("message")) {
+                            isBroken = false;
                             Iterator<Attribute> attributes
                                     = startElement.getAttributes();
                             while (name == null && attributes.hasNext()) {
@@ -84,9 +85,8 @@ public final class XmlHandler {
 
                             bText = true;
                         } else if (qName.equalsIgnoreCase("disconnect")) {
-                            name = null;
-                            message = null;
-                            textColor = null;
+                            message = "";
+                            textColor = Color.BLACK;
                             isBroken = false;
                             disconnect = true;
                             output = new ChatTextLine(name, message, textColor, 
@@ -108,9 +108,9 @@ public final class XmlHandler {
             /* convert RGB to color-object */
             textColor = Color.decode(color);
         } catch (XMLStreamException ex) {
-            name = null;
-            message = null;
-            textColor = null;
+            name = "";
+            message = "";
+            textColor = Color.BLACK;
             isBroken = true;
             ex.printStackTrace();
         } finally {

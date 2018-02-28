@@ -78,6 +78,38 @@ public class UserView extends JFrame implements ActionListener {
         serverThread = new ServerThread(this);
         serverThread.start();
 
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                /*Disconnects all client conections*/
+                List<ClientConnection> clientConnects
+                        = ClientConnection.getClientConnections();
+                for (ClientConnection closeClient : clientConnects) {
+                    closeClient.sendExitMessage();
+                }
+
+                /*Disconnects from all servers*/
+                List<ServerConnection> servers
+                        = ServerConnection.getServerConnections();
+                for (ServerConnection closeServer : servers) {
+                    List<ChatListener> serverClients = 
+                            closeServer.getChatListeners();
+                    for (ChatListener closeClients : serverClients) {                        
+                        closeServer.sendExitMessage(closeClients);
+                        System.out.println("A");
+                    }                    
+                }
+
+            }
+        });
+
+//        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+//        this.addWindowListener(new WindowAdapter() {
+//            public void windowClosing(WindowEvent e) {
+//                setVisible(false);
+//                dispose();
+//                System.out.println("test");                
+//            }
+//        });
     }
 
     /**
@@ -115,7 +147,7 @@ public class UserView extends JFrame implements ActionListener {
     /**
      * Removes a chat.
      */
-    private void removeChat(Chat chatIn) {
+    public void removeChat(Chat chatIn) {
         myTabbedPane.remove(chatIn);
     }
 
@@ -204,7 +236,7 @@ public class UserView extends JFrame implements ActionListener {
         if (selection == 0) { // Om OK ta ut det valda objektet ur comboboxen och se till att disconnecta från clienten med den IPn
             Object selectedDisconnect = disconnectBox.getSelectedItem();
             removeChat(((ClientConnection) selectedDisconnect).getChat());
-            
+
             ((ClientConnection) selectedDisconnect).sendDisconnectMessage();
             ((ClientConnection) selectedDisconnect).closeConnection();
         }
@@ -218,8 +250,8 @@ public class UserView extends JFrame implements ActionListener {
         JPanel myPanel = new JPanel();
 
         //String[] test = {"Anders", "Klas", "Ok", "Test"}; //Lägg in IPs i ARRAYN  
-        List<ServerConnection> servers = 
-                ServerConnection.getServerConnections();
+        List<ServerConnection> servers
+                = ServerConnection.getServerConnections();
 
         JComboBox<ChatListener> kickBox = new JComboBox<>();
 
@@ -248,7 +280,7 @@ public class UserView extends JFrame implements ActionListener {
             }
 
             kickServer.sendDisconnectMessage((ChatListener) selectedKick);
-            ((ChatListener) selectedKick).closeConnection();
+            kickServer.removeClient((ChatListener) selectedKick);
 
         }
     }
