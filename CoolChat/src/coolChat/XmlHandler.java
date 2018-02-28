@@ -29,7 +29,7 @@ import javax.xml.stream.events.XMLEvent;
  * @author Anders
  */
 public final class XmlHandler {
-    
+
     private XmlHandler() {
         throw new IllegalStateException("Do not instantiate this class.");
     }
@@ -39,12 +39,13 @@ public final class XmlHandler {
         String message = "";
         String color = null;
         Boolean isBroken = false;
+        Boolean disconnect = false;
         Color textColor = null;
         ChatTextLine output = null;
         XMLInputFactory factory = XMLInputFactory.newInstance();
 
         boolean bText = false;
-        
+
         Attribute nextName;
         Attribute nextColor;
 
@@ -59,31 +60,38 @@ public final class XmlHandler {
                     case XMLStreamConstants.START_ELEMENT:
                         StartElement startElement = event.asStartElement();
                         String qName = startElement.getName().getLocalPart();
-
                         if (qName.equalsIgnoreCase("message")) {
-                            Iterator<Attribute> attributes = 
-                                    startElement.getAttributes();
-                                while (name == null && attributes.hasNext()) {
-                                    nextName = attributes.next();
-                                    if (nextName.getName().toString()
-                                            .equals("sender")){
-                                        name = nextName.getValue();
-                                    }
+                            Iterator<Attribute> attributes
+                                    = startElement.getAttributes();
+                            while (name == null && attributes.hasNext()) {
+                                nextName = attributes.next();
+                                if (nextName.getName().toString()
+                                        .equals("sender")) {
+                                    name = nextName.getValue();
                                 }
-                                
-                          System.out.println(name);
+                            }
+
                         } else if (qName.equalsIgnoreCase("text")) {
-                            Iterator<Attribute> attributes = 
-                                    startElement.getAttributes();
+                            Iterator<Attribute> attributes
+                                    = startElement.getAttributes();
                             while (color == null && attributes.hasNext()) {
-                                    nextColor = attributes.next();
-                                    if (nextColor.getName().toString()  //Stilguiden??
-                                            .equals("color")){
-                                        color = nextColor.getValue();
-                                    }
+                                nextColor = attributes.next();
+                                if (nextColor.getName().toString() //Stilguiden??
+                                        .equals("color")) {
+                                    color = nextColor.getValue();
                                 }
-                            
+                            }
+
                             bText = true;
+                        } else if (qName.equalsIgnoreCase("disconnect")) {
+                            name = null;
+                            message = null;
+                            textColor = null;
+                            isBroken = false;
+                            disconnect = true;
+                            output = new ChatTextLine(name, message, textColor, 
+                                    isBroken, disconnect);
+                            return output;
                         }
                         break;
 
@@ -105,11 +113,12 @@ public final class XmlHandler {
             textColor = null;
             isBroken = true;
             ex.printStackTrace();
-        } finally { 
-            output = new ChatTextLine(name, message, textColor, isBroken);
+        } finally {
+            output = new ChatTextLine(name, message, textColor, isBroken, 
+                    disconnect);
             return output; // If isBroken, still need to return 
         }
-        
+
     }
 
     public static String writeXml(String name, String textColor, String text) {
@@ -150,16 +159,14 @@ public final class XmlHandler {
         return messageOut;
     }
 
-    
-    public static String disconnectMessage(String nameIn){
-        return "<message sender=\"" + nameIn + "\"><disconnect>"
-                + "</disconnect></message>";
+    public static String disconnectMessage(String nameIn) {
+        return "<message sender=\"" + nameIn + "\"><disconnect /></message>";
     }
 
     public static void main(String[] args) {
 //        //String message = "<name attribute=\"value\">content</name>";
 //        //String message = "<class><student rollno = \"393\"><firstname>dinkar</firstname><lastname>kad</lastname><nickname>dinkar</nickname><marks>85</marks></student><student rollno = \"493\"><firstname>Vaneet</firstname><lastname>Gupta</lastname><nickname>vinni</nickname><marks>95</marks></student><student rollno = \"593\"><firstname>jasvir</firstname><lastname>singn</lastname><nickname>jazz</nickname><marks>90</marks></student></class>";
-        String message = "<message extra=\"plz ignore\" sender=\"Anders\" ><text exxxtra=\"plz iiiignore\" color=\"#000000\">Hej &amp; <fetstil>på</fetstil> dig</text></message>";
+          String message = "<message extra=\"plz ignore\" sender=\"Anders\" ><disconnect /><text exxxtra=\"plz iiiignore\" color=\"#000000\">Hej &amp; <fetstil>på</fetstil> dig</text></message>";
 //        //XmlHandler.readXml(message);
         //String message = "<?xml version=\"1.0\" ?><?xml version=\"1.0\" ?><message sender=\"Anders\"><text color=\"#000000\">Hej på dig</text></message>";
 //        String message = writeXml("Anders", "#RRGGBB", "Hej på dig");
@@ -169,7 +176,7 @@ public final class XmlHandler {
 //        System.out.println(message1);
 //        System.out.println(message2);
 //        System.out.println(readXml(message));
-        System.out.println(readXml(message).getColor());
+          System.out.println(readXml(message).getColor());
 
     }
 }
