@@ -134,7 +134,8 @@ public class ServerConnection {
         if (!isGroupChat) {
             serverConnects.remove(this);
         }
-
+        System.out.println("output INNAN" + outPut.size());
+        
         try {
             discSocket.close();
         } catch (IOException ex) {
@@ -149,7 +150,7 @@ public class ServerConnection {
         //inListen.get(removeIndex).closeConnection();
         inListen.remove(listenIn);
         
-        System.out.println("output" + outPut.size());
+        System.out.println("output INNAn" + outPut.size());
         System.out.println("remove index" + removeIndex);
     }
 

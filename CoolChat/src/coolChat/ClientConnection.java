@@ -38,23 +38,14 @@ public class ClientConnection {
      * @param port
      * @param userViewIn
      */
-    public ClientConnection(String hostAddress, int port, UserView userViewIn) {
+    public ClientConnection(String hostAddress, int port, UserView userViewIn) throws IOException {
         myUserView = userViewIn;
 
-        try {
-            mySocket = new Socket(hostAddress, port);
-            System.out.println("Connected to:" + hostAddress);
-            out = new PrintWriter(mySocket.getOutputStream(), true);
-            inListen = new ChatListener(mySocket, this);
-            inListen.start();
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host.\n" + e);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for "
-                    + "the connection to host.\n" + e);
-            System.exit(1);
-        }
+        mySocket = new Socket(hostAddress, port);
+        System.out.println("Connected to:" + hostAddress);
+        out = new PrintWriter(mySocket.getOutputStream(), true);
+        inListen = new ChatListener(mySocket, this);
+        inListen.start();
 
         myChat = new Chat(this);
         myUserView.addChat(myChat);
@@ -95,7 +86,9 @@ public class ClientConnection {
 
     @Override
     public String toString() {
-        return mySocket.getInetAddress().toString();
+        String chatNr =  ((Integer)myChat.getChatNr()).toString();
+        
+        return mySocket.getInetAddress().toString()+ " in Chat " + chatNr;
     }
 
     /**
@@ -112,8 +105,8 @@ public class ClientConnection {
 
         if (messageIn.isDisconnectMessage()) {
             // messageIn.getName() + " has disconnected.";    /// Lägg till popup på kickad chat
-            JOptionPane.showMessageDialog(myChat, "Du blev kickad av " + 
-                    messageIn.getName());
+            JOptionPane.showMessageDialog(myChat, "Du blev kickad av "
+                    + messageIn.getName());
             myUserView.removeChat(myChat);
             closeConnection();
             removeClient();
@@ -133,7 +126,7 @@ public class ClientConnection {
         sendMessage(XmlHandler.disconnectMessage(myChat.getChatName()));
         removeClient();
     }
-    
+
     public void sendExitMessage() {
         sendMessage(XmlHandler.disconnectMessage(myChat.getChatName()));
     }

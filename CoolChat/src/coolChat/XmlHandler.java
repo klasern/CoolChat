@@ -176,11 +176,20 @@ public final class XmlHandler {
     }
     
     /**
-     * Creates no rewuest tag pair.
+     * Creates "no" request tag pair.
      * @return 
      */
     public static String requestNoMessage() {
         return "<request reply=\"no\"></request>";
+    }
+    
+    /**
+     * Creates request tag.
+     * @param message
+     * @return 
+     */
+    public static String requestMessage(String message){
+        return "<request>" + message + "</request>";
     }
 
     public static void main(String[] args) {

@@ -178,13 +178,19 @@ public class UserView extends JFrame implements ActionListener {
         /*Creates Jpanel to add to JOptionPane for input ip and port.*/
         myPanel.setLayout(new GridLayout(0, 2, 2, 2));
 
-        JTextField serverIpIn = new JTextField(10);
+        JTextField serverIpIn = new JTextField(0);
         JTextField portNrIn = new JTextField(10);
+        JTextField requestMsg = new JTextField(10);
 
+        requestMsg.setText("JAG VILL ANSLUTA");
+        
         myPanel.add(new JLabel("Server IP: "));
         myPanel.add(serverIpIn);
         myPanel.add(new JLabel("Port number:"));
         myPanel.add(portNrIn);
+        myPanel.add(new JLabel("Meddelande:"));
+        myPanel.add(requestMsg);
+        
 
         int option = JOptionPane.showConfirmDialog(this, myPanel, "Connect",
                 JOptionPane.OK_CANCEL_OPTION);
@@ -194,16 +200,21 @@ public class UserView extends JFrame implements ActionListener {
         System.out.println(serverIpIn.getText() + " - " + portNrIn.getText());
 
         if (option == JOptionPane.YES_OPTION) { //If yes creates a clientConnection
+            
             try {
                 serverIp = serverIpIn.getText();
                 portNr = Integer.parseInt(portNrIn.getText());
 
                 ClientConnection connection = new ClientConnection(serverIp,
                         portNr, this);
+                
+                connection.sendMessage(XmlHandler.requestMessage(
+                        requestMsg.getText()));
 
                 //clientConnects.add(connection);
                 //connection.start();
-            } catch (NumberFormatException nfe) {
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "DÅLIG PORT/IP");
                 System.out.println("Dålig Port");
             }
         }
@@ -280,7 +291,7 @@ public class UserView extends JFrame implements ActionListener {
             }
 
             kickServer.sendDisconnectMessage((ChatListener) selectedKick);
-            kickServer.removeClient((ChatListener) selectedKick);
+            //kickServer.removeClient((ChatListener) selectedKick);
 
         }
     }

@@ -25,7 +25,13 @@ import javax.swing.text.StyledDocument;
  *
  */
 public class Chat extends JPanel implements ActionListener {
-
+    
+    /* Number of chats created */
+    private static int createdChats = 1;
+    
+    /* This chats' number */
+    private int chatNr;
+    
     /* Create the graphic components needed for a single chat-window */
     private JScrollPane myScrollPane;
     private JTextField myTextField;
@@ -51,6 +57,9 @@ public class Chat extends JPanel implements ActionListener {
     private ClientConnection client;
 
     public Chat() {
+        
+        chatNr = createdChats ++;
+        
         /* Used to append text to the chatTextPane*/
         document = new DefaultStyledDocument();
         context = new StyleContext();
@@ -114,6 +123,10 @@ public class Chat extends JPanel implements ActionListener {
      */
     public String getChatName(){
         return name;
+    }
+    
+    public int getChatNr(){
+        return chatNr;
     }
 
     /**

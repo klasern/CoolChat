@@ -30,7 +30,7 @@ public class ChatListener extends Thread {
     private ClientConnection client;
     private Socket theSocket;
 
-    public ChatListener(Socket socketIn, ServerConnection serverIn, 
+    public ChatListener(Socket socketIn, ServerConnection serverIn,
             BufferedReader inReader, PrintWriter outWriter) {
         theSocket = socketIn;
         server = serverIn;
@@ -49,24 +49,26 @@ public class ChatListener extends Thread {
         }
 
     }
-    
+
     /**
      * Returns the socket.
-     * @return 
+     *
+     * @return
      */
-    public Socket getSocket(){
+    public Socket getSocket() {
         return theSocket;
     }
 
     /**
      * Return ServerConnection
-     * @return 
+     *
+     * @return
      */
     public ServerConnection getServer() {
         return server;
     }
-    
-    public PrintWriter getPrintWriter(){
+
+    public PrintWriter getPrintWriter() {
         return out;
     }
 
@@ -83,7 +85,14 @@ public class ChatListener extends Thread {
 
     @Override
     public String toString() {
-        return theSocket.getInetAddress().toString();
+        String chatNr;
+        if (server != null) {
+            chatNr = ((Integer)server.getChat().getChatNr()).toString();
+        } else {
+            chatNr = ((Integer)client.getChat().getChatNr()).toString();
+        }
+
+        return theSocket.getInetAddress().toString() + "in Chat " + chatNr;
     }
 
     public void run() {
