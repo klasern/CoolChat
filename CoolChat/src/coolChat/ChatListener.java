@@ -3,7 +3,7 @@
  * 
  * V 1.0
  *
- * 2018-01-17
+ * 2018-03-01
  * 
  * Copyright notice
  */
@@ -18,8 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author klasern
+ * ChatListener class, reads input from socket.
  */
 public class ChatListener extends Thread {
 
@@ -30,6 +29,14 @@ public class ChatListener extends Thread {
     private ClientConnection client;
     private Socket theSocket;
 
+    /**
+     * Constructor for server.
+     *
+     * @param socketIn
+     * @param serverIn
+     * @param inReader
+     * @param outWriter
+     */
     public ChatListener(Socket socketIn, ServerConnection serverIn,
             BufferedReader inReader, PrintWriter outWriter) {
         theSocket = socketIn;
@@ -38,6 +45,12 @@ public class ChatListener extends Thread {
         out = outWriter;
     }
 
+    /**
+     * Constructor for client.
+     *
+     * @param socketIn
+     * @param clientIn
+     */
     public ChatListener(Socket socketIn, ClientConnection clientIn) {
         theSocket = socketIn;
         client = clientIn;
@@ -48,28 +61,6 @@ public class ChatListener extends Thread {
             System.out.println("getInputStream failed: " + e);
         }
 
-    }
-
-    /**
-     * Returns the socket.
-     *
-     * @return
-     */
-    public Socket getSocket() {
-        return theSocket;
-    }
-
-    /**
-     * Return ServerConnection
-     *
-     * @return
-     */
-    public ServerConnection getServer() {
-        return server;
-    }
-
-    public PrintWriter getPrintWriter() {
-        return out;
     }
 
     /**
@@ -87,12 +78,12 @@ public class ChatListener extends Thread {
     public String toString() {
         String chatNr;
         if (server != null) {
-            chatNr = ((Integer)server.getChat().getChatNr()).toString();
+            chatNr = ((Integer) server.getChat().getChatNr()).toString();
         } else {
-            chatNr = ((Integer)client.getChat().getChatNr()).toString();
+            chatNr = ((Integer) client.getChat().getChatNr()).toString();
         }
 
-        return theSocket.getInetAddress().toString() + "in Chat " + chatNr;
+        return theSocket.getInetAddress().toString() + " in Chat " + chatNr;
     }
 
     public void run() {
@@ -114,6 +105,32 @@ public class ChatListener extends Thread {
                 break;
             }
         }
+    }
+
+    /**
+     * Returns the socket.
+     *
+     * @return
+     */
+    public Socket getSocket() {
+        return theSocket;
+    }
+
+    /**
+     * Return ServerConnection
+     *
+     * @return
+     */
+    public ServerConnection getServer() {
+        return server;
+    }
+
+    /**
+     * Returns printwriters.
+     * @return 
+     */
+    public PrintWriter getPrintWriter() {
+        return out;
     }
 
 }

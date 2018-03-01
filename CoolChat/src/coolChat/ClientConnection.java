@@ -3,7 +3,7 @@
  * 
  * V 1.0
  *
- * 2018-01-17
+ * 2018-03-01
  * 
  * Copyright notice
  */
@@ -33,16 +33,18 @@ public class ClientConnection {
     private ChatListener inListen;
 
     /**
+     * Creates clientconnection.
      *
      * @param hostAddress
      * @param port
      * @param userViewIn
      */
-    public ClientConnection(String hostAddress, int port, UserView userViewIn) throws IOException {
+    public ClientConnection(String hostAddress, int port, UserView userViewIn)
+            throws Exception {
         myUserView = userViewIn;
 
-        mySocket = new Socket(hostAddress, port);
-        System.out.println("Connected to:" + hostAddress);
+        mySocket = new Socket();
+        mySocket.connect(new InetSocketAddress(hostAddress, port), 5000);
         out = new PrintWriter(mySocket.getOutputStream(), true);
         inListen = new ChatListener(mySocket, this);
         inListen.start();
@@ -52,6 +54,79 @@ public class ClientConnection {
 
         clientConnects.add(this);
 
+    }
+
+    /**
+     * Close connection with server.
+     */
+    public void closeConnection() {
+        try {
+            mySocket.close();
+            removeClient();
+        } catch (IOException ex) {
+            Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * Removes client form list o clientconnections.
+     */
+    private void removeClient() {
+        clientConnects.remove(this);
+    }
+
+    @Override
+    public String toString() {
+        String chatNr = ((Integer) myChat.getChatNr()).toString();
+        return mySocket.getInetAddress().toString() + " in Chat " + chatNr;
+    }
+
+    /**
+     * Used to send message to server which client is connected to.
+     *
+     * @param messageOut
+     */
+    public void sendMessage(String messageOut) {
+        out.println(messageOut);
+    }
+
+    /**
+     * Send disconnect message.
+     */
+    public void sendDisconnectMessage() {
+        sendMessage(XmlHandler.disconnectMessage(myChat.getChatName()));
+        removeClient();
+    }
+
+    /**
+     * Send exit message.
+     */
+    public void sendExitMessage() {
+        sendMessage(XmlHandler.disconnectMessage(myChat.getChatName()));
+    }
+
+    public void writeMessage(String message) {
+        ChatTextLine messageIn = XmlHandler.readXml(message);
+
+        if (messageIn.isDisconnectMessage() || messageIn.isRequest()) {
+
+            if (messageIn.getName() == null) {
+                JOptionPane.showMessageDialog(myChat, "Du blev nekad åtkomst.");
+            } else {
+                JOptionPane.showMessageDialog(myChat, "Du blev kickad av "
+                        + messageIn.getName());
+            }
+
+            myUserView.removeChat(myChat);
+            closeConnection();
+            removeClient();
+        } else if (!messageIn.isBroken()) {
+            myChat.appendToPane(messageIn.getName(), messageIn.getMessage(),
+                    messageIn.getColor());
+        } else {
+            myChat.appendToPane("Server", "Något fel med xmlen.",
+                    Color.BLACK);
+        }
     }
 
     /**
@@ -70,72 +145,6 @@ public class ClientConnection {
      */
     public Chat getChat() {
         return myChat;
-    }
-
-    /**
-     * Close connection with server.
-     */
-    public void closeConnection() {
-        try {
-            mySocket.close();
-            removeClient();
-        } catch (IOException ex) {
-            Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
-    public String toString() {
-        String chatNr =  ((Integer)myChat.getChatNr()).toString();
-        
-        return mySocket.getInetAddress().toString()+ " in Chat " + chatNr;
-    }
-
-    /**
-     * Used to send message to server which client is connected to.
-     *
-     * @param messageOut
-     */
-    public void sendMessage(String messageOut) {
-        out.println(messageOut);
-    }
-
-    public void writeMessage(String message) {
-        ChatTextLine messageIn = XmlHandler.readXml(message);
-
-        if (messageIn.isDisconnectMessage()) {
-            // messageIn.getName() + " has disconnected.";    /// Lägg till popup på kickad chat
-            JOptionPane.showMessageDialog(myChat, "Du blev kickad av "
-                    + messageIn.getName());
-            myUserView.removeChat(myChat);
-            closeConnection();
-            removeClient();
-        } else if (!messageIn.isBroken()) {
-            myChat.appendToPane(messageIn.getName(), messageIn.getMessage(),
-                    messageIn.getColor());
-        } else {
-            myChat.appendToPane("Server", "Något fel med xmlen.",
-                    Color.BLACK);
-        }
-    }
-
-    /**
-     * Send disconect message
-     */
-    public void sendDisconnectMessage() {
-        sendMessage(XmlHandler.disconnectMessage(myChat.getChatName()));
-        removeClient();
-    }
-
-    public void sendExitMessage() {
-        sendMessage(XmlHandler.disconnectMessage(myChat.getChatName()));
-    }
-
-    /**
-     * Removes client form list o clientconnections.
-     */
-    private void removeClient() {
-        clientConnects.remove(this);
     }
 
 }

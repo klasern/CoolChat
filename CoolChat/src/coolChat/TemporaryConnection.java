@@ -3,7 +3,7 @@
  * 
  * V 1.0
  *
- * 2018-01-17
+ * 2018-03-01
  * 
  * Copyright notice
  */
@@ -51,44 +51,18 @@ public class TemporaryConnection extends Thread {
                 server.addChatListener(clientSocket, in, out);
             }
         }
-
-    }
-
-    /**
-     * Create new single chat.
-     *
-     * @param clientSocketIn
-     */
-    private void createNewChat(Socket clientSocketIn) {
-
-    }
-
-    /**
-     * Denies the connection which tries to connect.
-     */
-    private void denyConnection() {
-
-    }
-
-    /**
-     * Checks if connecting client is a noob client.
-     *
-     * @return
-     */
-    private boolean isNoobClient() {
-        return true;
     }
 
     /**
      * Used to ask if client should be added to group chat, single chat or
-     * delete connection.
+     * deny connection.
      */
     public void run() {
         String message = "";
         ChatTextLine checkMessage;
         String acceptString;
         boolean advancedClient;
-
+        
         JPanel myPanel = new JPanel();
 
         String[] options = {"Add to groupchat", "Create new chat",
@@ -103,9 +77,10 @@ public class TemporaryConnection extends Thread {
                             clientSocket.getOutputStream(), true);
             message = in.readLine();            
         } catch (IOException ex) {
-            Logger.getLogger(TemporaryConnection.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
 
+        /*Reads first message and checks if it contains request tags.*/
         checkMessage = XmlHandler.readXml(message);
         advancedClient = checkMessage.isRequest();
 
@@ -120,31 +95,17 @@ public class TemporaryConnection extends Thread {
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
                 options, options[0]);
 
-        System.out.println(selection + " SELECTION VALUE");
-
         switch (selection) {
-            case -1:                                          //If closes by x
-                try {                    
-                    if (advancedClient) {
-                        out.println(XmlHandler.requestNoMessage());
-                    } else {
-                        out.println(XmlHandler.disconnectMessage("Server"));
-                    }
-                    out.close();
-                    clientSocket.close();
-                } catch (IOException ex) {
-                    System.out.println("x");
-                    ex.printStackTrace();
-                }
-                break;
             case 0:                                           //If add groupchat
                 if (ServerConnection.groupChatActive == false) {
                     ServerConnection.groupChatActive = true;
                     ServerConnection server = new ServerConnection(clientSocket,
                             myUserView, true, in, out);
-                } else {                             //Add to existing groupchat
+                } else {                             
                     addToGroup();
                 }
+                /*If not advanced client added to groupchat distributes 
+                the connecting message.*/
                 if (!advancedClient) {
                     List<ServerConnection> servers
                             = ServerConnection.getServerConnections();
@@ -155,7 +116,6 @@ public class TemporaryConnection extends Thread {
                     }
                 }
                 break;
-            //server.start();
             case 1:                                             //If new chat
                 ServerConnection server = new ServerConnection(clientSocket,
                         myUserView, in, out);
@@ -163,11 +123,14 @@ public class TemporaryConnection extends Thread {
                     server.sendMessage(message);
                 }
                 break;
+            case -1:                                            //if closed by x
             case 2:                                             //if decline
                 try {
                     out = new PrintWriter(
                             clientSocket.getOutputStream(), true);
-                    if (advancedClient) {
+                    /*If advanced client return decline tags, 
+                    otherwise return disconnect tag.*/
+                    if (advancedClient) {                                               
                         out.println(XmlHandler.requestNoMessage());
                     } else {
                         out.println(XmlHandler.disconnectMessage("Server"));
@@ -175,14 +138,11 @@ public class TemporaryConnection extends Thread {
                     out.close();
                     clientSocket.close();
                 } catch (IOException ex) {
-                    System.out.println("x");
                     ex.printStackTrace();
                 }
                 break;
             default:
                 break;
         }
-
     }
-
 }

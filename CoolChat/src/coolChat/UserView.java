@@ -3,7 +3,7 @@
  * 
  * V 1.0
  *
- * 2018-01-17
+ * 2018-03-01
  * 
  * Copyright notice
  */
@@ -13,7 +13,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.*;
-import java.net.*;
 import java.util.*;
 import javax.swing.*;
 
@@ -29,26 +28,13 @@ public class UserView extends JFrame implements ActionListener {
     private JButton disconnectButton;
     private JButton kickButton;
 
-    /*Chat objects*/
-    private List<Chat> chats;
-
     /* Connections */
-    private List<Socket> clients;
-    //private List<ClientConnection> clientConnects;
     private ServerThread serverThread;
-
-    private int chatNr = 1;
 
     /**
      * Creates the UserView.
      */
     public UserView() {
-        /*Creates Lsits*/
-        chats = new ArrayList<>();
-        clients = new ArrayList<>();
-        //clientConnects = new ArrayList<>();
-        //serverConnects = new ArrayList<>();
-
         /*Creates GUI*/
         this.setPreferredSize(new Dimension(1000, 1000));
 
@@ -78,6 +64,7 @@ public class UserView extends JFrame implements ActionListener {
         serverThread = new ServerThread(this);
         serverThread.start();
 
+        /*Send disconnect messages on close. */
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 /*Disconnects all client conections*/
@@ -91,131 +78,97 @@ public class UserView extends JFrame implements ActionListener {
                 List<ServerConnection> servers
                         = ServerConnection.getServerConnections();
                 for (ServerConnection closeServer : servers) {
-                    List<ChatListener> serverClients = 
-                            closeServer.getChatListeners();
-                    for (ChatListener closeClients : serverClients) {                        
+                    List<ChatListener> serverClients
+                            = closeServer.getChatListeners();
+                    for (ChatListener closeClients : serverClients) {
                         closeServer.sendExitMessage(closeClients);
-                        System.out.println("A");
-                    }                    
+                    }
                 }
-
             }
         });
-
-//        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-//        this.addWindowListener(new WindowAdapter() {
-//            public void windowClosing(WindowEvent e) {
-//                setVisible(false);
-//                dispose();
-//                System.out.println("test");                
-//            }
-//        });
     }
 
     /**
-     * Adds the chat to the JTabbedPane
+     * Adds the chat to the JTabbedPane.
      *
      * @param chatIn
      */
     public void addChat(Chat chatIn) {
-        myTabbedPane.add("Chat " + chatNr, chatIn);
-        chats.add(chatIn);
-        chatNr += 1;
+        myTabbedPane.add("Chat " + chatIn.getChatNr(), chatIn);
     }
 
     /**
-     * Connects to another IP for chat.
-     */
-    private void connect(String serverIpIn, int portNrIn) {
-
-    }
-
-    /**
-     * Disconnects from a chat.
-     */
-    private void disconnectChat() {
-
-    }
-
-    /**
-     * Kicks a client from server.
-     */
-    private void kickClient() {
-
-    }
-
-    /**
-     * Removes a chat.
+     * Removes a chat from GUI.
      */
     public void removeChat(Chat chatIn) {
         myTabbedPane.remove(chatIn);
     }
 
+    /**
+     * Actions when pressing connect-,disconnect- and kickbutton.
+     * @param e 
+     */
     @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == connectButton) { //Action when pressing connectbutton
-            System.out.println("ConnectButton");
-            connectMessageBox();
+    public void actionPerformed(ActionEvent e) {        
+        if (e.getSource() == connectButton) {
+            
+            /*Creates new thread to avoid program freezing when connecting to an 
+            IP where noone is listening. */
+            Thread connectThread = new Thread() {
+                public void run() {
+                    connectMessageBox();
+                }
+            };
+            connectThread.start();            
         } else if (e.getSource() == disconnectButton) {
-            System.out.println("disconnectButton");
             disconnectMessageBox();
         } else if (e.getSource() == kickButton) {
-            System.out.println("kickButton");
             kickMessageBox();
         }
 
     }
 
     /**
-     * Opens a messageox where user can input IP, and port number which it wants
-     * to connect to.
+     * Opens a messageox where user can input IP, port number, and connecting 
+     * message which it wants to connect to.
      */
     private void connectMessageBox() {
         JPanel myPanel = new JPanel();
-        String serverIp;   //If connect will use this field
-        int portNr;     //If connect will use this field
+        String serverIp;   
+        int portNr;     
 
-        /*Creates Jpanel to add to JOptionPane for input ip and port.*/
+        /*Builds the message box.*/
         myPanel.setLayout(new GridLayout(0, 2, 2, 2));
-
         JTextField serverIpIn = new JTextField(0);
         JTextField portNrIn = new JTextField(10);
         JTextField requestMsg = new JTextField(10);
-
         requestMsg.setText("JAG VILL ANSLUTA");
-        
         myPanel.add(new JLabel("Server IP: "));
         myPanel.add(serverIpIn);
         myPanel.add(new JLabel("Port number:"));
         myPanel.add(portNrIn);
         myPanel.add(new JLabel("Meddelande:"));
         myPanel.add(requestMsg);
-        
 
+        /*View the popup and take input choice.*/
         int option = JOptionPane.showConfirmDialog(this, myPanel, "Connect",
                 JOptionPane.OK_CANCEL_OPTION);
 
-        System.out.println(JOptionPane.YES_OPTION + " yes value");
-        System.out.println(JOptionPane.CANCEL_OPTION + " cancel value");
-        System.out.println(serverIpIn.getText() + " - " + portNrIn.getText());
+        if (option == JOptionPane.YES_OPTION) { 
 
-        if (option == JOptionPane.YES_OPTION) { //If yes creates a clientConnection
-            
             try {
                 serverIp = serverIpIn.getText();
                 portNr = Integer.parseInt(portNrIn.getText());
 
                 ClientConnection connection = new ClientConnection(serverIp,
                         portNr, this);
-                
+
+                /*Send request message to server.*/
                 connection.sendMessage(XmlHandler.requestMessage(
                         requestMsg.getText()));
 
-                //clientConnects.add(connection);
-                //connection.start();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "DÅLIG PORT/IP");
-                System.out.println("Dålig Port");
             }
         }
 
@@ -227,10 +180,11 @@ public class UserView extends JFrame implements ActionListener {
      */
     private void disconnectMessageBox() {
         JPanel myPanel = new JPanel();
-
+        
+        /*List of all servers connected to.*/
         List<ClientConnection> clientConnects
                 = ClientConnection.getClientConnections();
-
+        
         JComboBox<ClientConnection> disconnectBox = new JComboBox<>();
 
         for (ClientConnection addClient : clientConnects) {
@@ -244,7 +198,8 @@ public class UserView extends JFrame implements ActionListener {
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
                 options, options[0]);
 
-        if (selection == 0) { // Om OK ta ut det valda objektet ur comboboxen och se till att disconnecta från clienten med den IPn
+        /*If choice is OK, removes server and chat from GUI.*/
+        if (selection == 0) {
             Object selectedDisconnect = disconnectBox.getSelectedItem();
             removeChat(((ClientConnection) selectedDisconnect).getChat());
 
@@ -257,15 +212,15 @@ public class UserView extends JFrame implements ActionListener {
     /**
      * A messagebox where user can decide which client to kick.
      */
-    private void kickMessageBox() { //Eventuell kodupprepning som kan fixas med disconnectbox
+    private void kickMessageBox() {
         JPanel myPanel = new JPanel();
 
-        //String[] test = {"Anders", "Klas", "Ok", "Test"}; //Lägg in IPs i ARRAYN  
         List<ServerConnection> servers
                 = ServerConnection.getServerConnections();
 
         JComboBox<ChatListener> kickBox = new JComboBox<>();
 
+        /*All clients connected to our servers added to JComboBox.*/
         for (ServerConnection addServer : servers) {
             List<ChatListener> serverClients = addServer.getChatListeners();
             for (ChatListener addClients : serverClients) {
@@ -280,20 +235,19 @@ public class UserView extends JFrame implements ActionListener {
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
                 options, options[0]);
 
-        if (selection == 0) { // Om OK ta ut det valda objektet ur comboboxen och se till att disconnecta från clienten med den IPn
+        /*If OK removes client from server and kicks it out.*/
+        if (selection == 0) { 
             Object selectedKick = kickBox.getSelectedItem();
 
             ServerConnection kickServer
                     = ((ChatListener) selectedKick).getServer();
 
-            if (!kickServer.isGroupChat()) { //Removes chat if server is not groupchat
+            /*Removes chat if server is not groupchat.*/
+            if (!kickServer.isGroupChat()) {
                 removeChat(kickServer.getChat());
             }
 
             kickServer.sendDisconnectMessage((ChatListener) selectedKick);
-            //kickServer.removeClient((ChatListener) selectedKick);
-
         }
     }
-
 }

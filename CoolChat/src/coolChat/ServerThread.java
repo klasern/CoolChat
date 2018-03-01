@@ -3,7 +3,7 @@
  * 
  * V 1.0
  *
- * 2018-01-17
+ * 2018-03-01
  * 
  * Copyright notice
  */
@@ -11,6 +11,8 @@ package coolChat;
 
 import java.io.*;
 import java.net.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 
 /**
@@ -19,7 +21,7 @@ import javax.swing.*;
  */
 public class ServerThread extends Thread {
 
-    /*The port we listens to*/
+    /*The port we listen to*/
     private ServerSocket serverSocket;
     private int port;
     private UserView myUserView;
@@ -35,18 +37,22 @@ public class ServerThread extends Thread {
     }
 
     /**
-     * Used to get correct port.
+     * Used to get a correct port.
      */
     private boolean startServerSocket() {
+
+        /*When cancel or close window is pressed, the program closes.*/
         try {
             port = Integer.parseInt(
                     JOptionPane.showInputDialog(myUserView,
-                            "What port to listen to?"));
+                            "What port to listen to? 2000-60000"));
             serverSocket = new ServerSocket(port);
-        } catch (Exception e) {
-            System.out.println("Could not listen on port: " + port);
+        } catch (IOException ex) {
+            return true;
+        } catch (NumberFormatException nfe) {            
             return true;
         }
+
         return false;
     }
 
@@ -54,14 +60,15 @@ public class ServerThread extends Thread {
      * Ask which port to listen to and listen to that port.
      */
     public void run() {
-
+        
         boolean startUp = true;
 
+        /*Ask user for port until it is valid.*/
         while (startUp) {
             startUp = startServerSocket();
         }
-        //Gets port to listen to.
 
+        /*Listen to connections.*/
         while (true) {
             Socket clientSocket = null;
             try {
@@ -69,12 +76,9 @@ public class ServerThread extends Thread {
                 Thread temporaryThread = new TemporaryConnection(clientSocket,
                         myUserView);
                 temporaryThread.start();
-            } catch (IOException e) {
+            } catch (IOException e) {                
                 System.out.println("Accept failed: " + port);
             }
-
         }
-
     }
-
 }

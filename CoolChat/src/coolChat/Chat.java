@@ -3,36 +3,32 @@
  *
  * V 1.0
  * 
+ * 2018-03-01
  */
 package coolChat;
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
 
 /**
- * A graphic component used for a single chat-window i UserView. Also exchanges
+ * A graphic component used for a single chat-window in UserView. Also exchanges
  * data with the connection-object corresponding to the chat.
- *
- *
  */
 public class Chat extends JPanel implements ActionListener {
-    
+
     /* Number of chats created */
-    private static int createdChats = 1;
-    
+    public static int createdChats = 1;
+
     /* This chats' number */
     private int chatNr;
-    
-    /* Create the graphic components needed for a single chat-window */
+
+    /*Graphic components needed for a single chat-window */
     private JScrollPane myScrollPane;
     private JTextField myTextField;
     private JTextPane chatTextPane;
@@ -49,17 +45,20 @@ public class Chat extends JPanel implements ActionListener {
     /* The username and chatcolor for this specific chat. */
     private String name;
     private Color textColor;
-    private String color; //Color as RGB string
+    private String color;                               //Color as RGB string
 
     /* The chat exchanges data with EITHER a ServerConnectio or a 
     ClientConnection */
     private ServerConnection server;
     private ClientConnection client;
 
+    /**
+     * Creates a chat object used to write text.
+     */
     public Chat() {
-        
-        chatNr = createdChats ++;
-        
+        chatNr = createdChats;
+        createdChats ++;
+
         /* Used to append text to the chatTextPane*/
         document = new DefaultStyledDocument();
         context = new StyleContext();
@@ -78,7 +77,7 @@ public class Chat extends JPanel implements ActionListener {
         /* Set default name and color */
         name = "Petter-Niklas";
         textColor = Color.magenta;
-        color = "#"+Integer.toHexString(textColor.getRGB()).substring(2);
+        color = "#" + Integer.toHexString(textColor.getRGB()).substring(2);
 
         /* Add to bottompanel */
         myTextField.setPreferredSize(new Dimension(600, 30));
@@ -107,32 +106,30 @@ public class Chat extends JPanel implements ActionListener {
 
     }
 
+    /**
+     * Constructor used for chat when user is server.
+     *
+     * @param serverIn
+     */
     public Chat(ServerConnection serverIn) {
         this();
         this.server = serverIn;
     }
 
+    /**
+     * Constructor used for chat when user is client.
+     *
+     * @param clientIn
+     */
     public Chat(ClientConnection clientIn) {
         this();
         this.client = clientIn;
     }
-    
-    /**
-     * Returns name of chat.
-     * @return 
-     */
-    public String getChatName(){
-        return name;
-    }
-    
-    public int getChatNr(){
-        return chatNr;
-    }
 
     /**
-     * Adds a line of text to the chatTextPane.
+     * Adds a line of text to the chatTextPane with given name and color.
      *
-     * @param tp
+     * @param nameIn
      * @param msg
      * @param c
      */
@@ -142,23 +139,26 @@ public class Chat extends JPanel implements ActionListener {
         try {
             document.insertString(document.getLength(), nameIn + ": "
                     + msg + "\n", style);
-            chatTextPane.setCaretPosition(chatTextPane.getDocument().getLength());
+            /*Keeps TextPane at the bottom (i.e. autoscrolls down). */
+            chatTextPane.setCaretPosition(
+                    chatTextPane.getDocument().getLength());
         } catch (BadLocationException e) {
         }
 
     }
 
-    public void paintTheCanvas(String textIn) {
-        appendToPane(name, textIn, textColor);
-    }
-
+    /**
+     * Actions when pressing send-, color-, and namebuttons. Also action 
+     * when written in textfield.
+     * @param e 
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == colorButton) {
-            Color newColor = JColorChooser.showDialog(this, "Change Button Background",
-                    textColor);
+            Color newColor = JColorChooser.showDialog(this, 
+                    "Change Button Background", textColor);
             textColor = newColor;
-            color = "#"+Integer.toHexString(textColor.getRGB()).substring(2);
+            color = "#" + Integer.toHexString(textColor.getRGB()).substring(2);            
         } else if (e.getSource() == sendButton) {
             SendMessage(myTextField.getText());
         } else if (e.getSource() == nameButton) {
@@ -174,26 +174,31 @@ public class Chat extends JPanel implements ActionListener {
 
     /* Sends message when ENTER or Sendbutton i pressed */
     private void SendMessage(String message) {
-        // Lägg till: När vi är server så skickar vi iväg meddelande till andra
-        // När vi är client, skicka enbart
         String messageOut = XmlHandler.writeXml(name, color, message);
         if (server != null) {
             server.sendMessage(messageOut);
             myTextField.setText("");
-        }
-        else {
+        } else {                               //server = null => client != null
             client.sendMessage(messageOut);
             myTextField.setText("");
         }
-
     }
 
-//    public static void main(String[] args) {
-//        JFrame myFrame = new JFrame();
-//        Chat myChat = new Chat();
-//        myFrame.add(myChat);
-//        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        myFrame.pack();
-//        myFrame.setVisible(true);
-//    }
+    /**
+     * Returns name of chat.
+     *
+     * @return
+     */
+    public String getChatName() {
+        return name;
+    }
+
+    /**
+     * Returns chat number.
+     *
+     * @return
+     */
+    public int getChatNr() {
+        return chatNr;
+    }
 }

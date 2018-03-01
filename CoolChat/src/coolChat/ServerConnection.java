@@ -3,7 +3,7 @@
  * 
  * V 1.0
  *
- * 2018-01-17
+ * 2018-03-01
  * 
  * Copyright notice
  */
@@ -13,8 +13,6 @@ import java.awt.Color;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -42,6 +40,7 @@ public class ServerConnection {
      */
     public ServerConnection(Socket clientSocketIn, UserView userViewIn,
             BufferedReader inReader, PrintWriter outWriter) {
+
         inListen = new ArrayList<ChatListener>();
         outPut = new ArrayList<PrintWriter>();
         clientSockets = new ArrayList<Socket>();
@@ -72,6 +71,13 @@ public class ServerConnection {
         isGroupChat = groupChatIn;
     }
 
+    /**
+     * Adds chatlistener to socket.
+     *
+     * @param clientSocketIn
+     * @param inReader
+     * @param outWriter
+     */
     public final void addChatListener(Socket clientSocketIn,
             BufferedReader inReader, PrintWriter outWriter) {
 
@@ -85,104 +91,14 @@ public class ServerConnection {
     }
 
     /**
-     * Returns if serversocket is groupchat or not.
-     *
-     * @return
-     */
-    public boolean isGroupChat() {
-        return isGroupChat;
-    }
-
-    /**
-     * Return all created serverConnections.
-     *
-     * @return
-     */
-    public static List<ServerConnection> getServerConnections() {
-        return serverConnects;
-    }
-
-    /**
-     * Return all ChatListener which listens to this server.
-     *
-     * @return
-     */
-    public List<ChatListener> getChatListeners() {
-        return inListen;
-    }
-
-    /**
-     * Return chat.
-     *
-     * @return
-     */
-    public Chat getChat() {
-        return myChat;
-    }
-
-    /**
-     * Removes client and its printwriter.
-     *
-     * @param listenIn
-     */
-    public void removeClient(ChatListener listenIn) {
-        int removeIndex = inListen.indexOf(listenIn);
-        Socket discSocket = listenIn.getSocket();
-        PrintWriter discWriter = listenIn.getPrintWriter();
-                
-
-        if (!isGroupChat) {
-            serverConnects.remove(this);
-        }
-        System.out.println("output INNAN" + outPut.size());
-        
-        try {
-            discSocket.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        
-        
-        
-        clientSockets.remove(discSocket);
-        
-        outPut.remove(discWriter);
-        //inListen.get(removeIndex).closeConnection();
-        inListen.remove(listenIn);
-        
-        System.out.println("output INNAn" + outPut.size());
-        System.out.println("remove index" + removeIndex);
-    }
-
-    /**
-     * Send disconnect message to kicked client and removes it from the lists.
-     *
-     * @param listenIn
-     */
-    public void sendDisconnectMessage(ChatListener listenIn) {
-        int dcIndex = inListen.indexOf(listenIn);
-        outPut.get(dcIndex).println(
-                XmlHandler.disconnectMessage(myChat.getChatName()));
-        removeClient(listenIn);
-    }
-
-    public void sendExitMessage(ChatListener listenIn) {
-        int dcIndex = inListen.indexOf(listenIn);
-        outPut.get(dcIndex).println(
-                XmlHandler.disconnectMessage(myChat.getChatName()));
-
-    }
-
-    /**
-     * Sends message to all clients connected to this server. theSocket
+     * Sends message to all clients connected to this server.
      *
      * @param messageOut
      * @param chatIn
      */
     public synchronized void sendMessage(String messageOut, ChatListener chatIn) {
         /* Create a chattextline-object that contains information to write on 
-        our own screen
-         */
+        our own screen*/
         ChatTextLine message = XmlHandler.readXml(messageOut);
 
         if (message.isDisconnectMessage()) {
@@ -198,7 +114,6 @@ public class ServerConnection {
                 for (PrintWriter out : outPut) {
                     out.println(discOut);
                 }
-
             }
             removeClient(chatIn);
         } else {
@@ -238,5 +153,87 @@ public class ServerConnection {
         }
     }
 
-    // Vill ha en metod för att lägga till i gruppchatten
+    /**
+     * Send disconnect message to kicked client and removes it from the lists.
+     *
+     * @param listenIn
+     */
+    public void sendDisconnectMessage(ChatListener listenIn) {
+        int dcIndex = inListen.indexOf(listenIn);
+        outPut.get(dcIndex).println(
+                XmlHandler.disconnectMessage(myChat.getChatName()));
+        removeClient(listenIn);
+    }
+
+    /**
+     * Send exit message.
+     * @param listenIn 
+     */
+    public void sendExitMessage(ChatListener listenIn) {
+        int dcIndex = inListen.indexOf(listenIn);
+        outPut.get(dcIndex).println(
+                XmlHandler.disconnectMessage(myChat.getChatName()));
+
+    }
+
+    /**
+     * Removes client and its printwriter.
+     *
+     * @param listenIn
+     */
+    public void removeClient(ChatListener listenIn) {
+        int removeIndex = inListen.indexOf(listenIn);
+        Socket discSocket = listenIn.getSocket();
+        PrintWriter discWriter = listenIn.getPrintWriter();
+
+        if (!isGroupChat) {
+            serverConnects.remove(this);
+        }
+
+        try {
+            discSocket.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        clientSockets.remove(discSocket);
+        outPut.remove(discWriter);
+        inListen.remove(listenIn);
+    }
+
+    /**
+     * Returns if serversocket is groupchat or not.
+     *
+     * @return
+     */
+    public boolean isGroupChat() {
+        return isGroupChat;
+    }
+
+    /**
+     * Return all created serverConnections.
+     *
+     * @return
+     */
+    public static List<ServerConnection> getServerConnections() {
+        return serverConnects;
+    }
+
+    /**
+     * Return all ChatListener which listens to this server.
+     *
+     * @return
+     */
+    public List<ChatListener> getChatListeners() {
+        return inListen;
+    }
+
+    /**
+     * Return chat.
+     *
+     * @return
+     */
+    public Chat getChat() {
+        return myChat;
+    }
 }

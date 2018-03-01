@@ -10,8 +10,8 @@
 package coolChat;
 
 /**
- *
- * @author klasern
+ * Starts a chat program.
+ * 
  */
 public class MainApplication {
     
