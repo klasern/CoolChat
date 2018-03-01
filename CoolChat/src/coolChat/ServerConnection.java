@@ -40,7 +40,8 @@ public class ServerConnection {
      * @param clientSocketIn
      * @param userViewIn
      */
-    public ServerConnection(Socket clientSocketIn, UserView userViewIn) {
+    public ServerConnection(Socket clientSocketIn, UserView userViewIn,
+            BufferedReader inReader, PrintWriter outWriter) {
         inListen = new ArrayList<ChatListener>();
         outPut = new ArrayList<PrintWriter>();
         clientSockets = new ArrayList<Socket>();
@@ -52,7 +53,7 @@ public class ServerConnection {
         myUserView.addChat(myChat);
 
         /* Create a ChatListener corresponding to the first connected client */
-        addChatListener(clientSocketIn);
+        addChatListener(clientSocketIn, inReader, outWriter);
 
     }
 
@@ -64,9 +65,23 @@ public class ServerConnection {
      * @param groupChatIn
      */
     public ServerConnection(Socket clientSocketIn, UserView userViewIn,
-            boolean groupChatIn) {
-        this(clientSocketIn, userViewIn);
+            boolean groupChatIn, BufferedReader inReader,
+            PrintWriter outWriter) {
+
+        this(clientSocketIn, userViewIn, inReader, outWriter);
         isGroupChat = groupChatIn;
+    }
+
+    public final void addChatListener(Socket clientSocketIn,
+            BufferedReader inReader, PrintWriter outWriter) {
+
+        clientSockets.add(clientSocketIn);
+        outPut.add(outWriter);
+        ChatListener listener = new ChatListener(clientSocketIn, this,
+                inReader, outWriter);
+        inListen.add(listener);
+        listener.start();
+
     }
 
     /**
@@ -112,20 +127,30 @@ public class ServerConnection {
      */
     public void removeClient(ChatListener listenIn) {
         int removeIndex = inListen.indexOf(listenIn);
+        Socket discSocket = listenIn.getSocket();
+        PrintWriter discWriter = listenIn.getPrintWriter();
+                
 
         if (!isGroupChat) {
             serverConnects.remove(this);
         }
 
         try {
-            clientSockets.get(removeIndex).close();
+            discSocket.close();
         } catch (IOException ex) {
-            Logger.getLogger(ServerConnection.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
-
-        clientSockets.remove(removeIndex);
-        outPut.remove(removeIndex);
-        inListen.remove(removeIndex);
+        
+        
+        
+        clientSockets.remove(discSocket);
+        
+        outPut.remove(discWriter);
+        //inListen.get(removeIndex).closeConnection();
+        inListen.remove(listenIn);
+        
+        System.out.println("output" + outPut.size());
+        System.out.println("remove index" + removeIndex);
     }
 
     /**
@@ -164,10 +189,10 @@ public class ServerConnection {
             if (!isGroupChat) {
                 JOptionPane.showMessageDialog(myChat, messageOut);
                 myUserView.removeChat(myChat);
-            } else {                
+            } else {
                 myChat.appendToPane("Server: ", messageOut,
                         Color.BLACK);
-                String discOut = XmlHandler.writeXml("Server: ", "#000000", 
+                String discOut = XmlHandler.writeXml("Server: ", "#000000",
                         messageOut);
                 for (PrintWriter out : outPut) {
                     out.println(discOut);
@@ -210,21 +235,6 @@ public class ServerConnection {
         for (PrintWriter out : outPut) {
             out.println(messageOut);
         }
-    }
-
-    public final void addChatListener(Socket clientSocketIn) {
-        try {
-            clientSockets.add(clientSocketIn);
-            outPut.add(new PrintWriter(
-                    clientSocketIn.getOutputStream(), true));
-            ChatListener listener = new ChatListener(clientSocketIn, this);
-            inListen.add(listener);
-            listener.start();
-        } catch (IOException e) {
-            System.out.println("getOutputStream failed: " + e);
-            //System.exit(1);  //TA BORT SENARE
-        }
-
     }
 
     // Vill ha en metod för att lägga till i gruppchatten

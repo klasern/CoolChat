@@ -12,6 +12,7 @@ package coolChat;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,20 +24,18 @@ import java.util.logging.Logger;
 public class ChatListener extends Thread {
 
     private BufferedReader in;
+    private PrintWriter out;
     private String message;
     private ServerConnection server;
     private ClientConnection client;
     private Socket theSocket;
 
-    public ChatListener(Socket socketIn, ServerConnection serverIn) {
+    public ChatListener(Socket socketIn, ServerConnection serverIn, 
+            BufferedReader inReader, PrintWriter outWriter) {
         theSocket = socketIn;
         server = serverIn;
-        try {
-            in = new BufferedReader(new InputStreamReader(
-                    theSocket.getInputStream()));
-        } catch (IOException e) {
-            System.out.println("getInputStream failed: " + e);
-        }
+        in = inReader;
+        out = outWriter;
     }
 
     public ChatListener(Socket socketIn, ClientConnection clientIn) {
@@ -65,6 +64,10 @@ public class ChatListener extends Thread {
      */
     public ServerConnection getServer() {
         return server;
+    }
+    
+    public PrintWriter getPrintWriter(){
+        return out;
     }
 
     /**

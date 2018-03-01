@@ -165,9 +165,22 @@ public final class XmlHandler {
         }
         return messageOut;
     }
-
+    
+    /**
+     * Creates disconnectmessage.
+     * @param nameIn
+     * @return 
+     */
     public static String disconnectMessage(String nameIn) {
         return "<message sender=\"" + nameIn + "\"><disconnect /></message>";
+    }
+    
+    /**
+     * Creates no rewuest tag pair.
+     * @return 
+     */
+    public static String requestNoMessage() {
+        return "<request reply=\"no\"></request>";
     }
 
     public static void main(String[] args) {
