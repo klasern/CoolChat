@@ -46,7 +46,6 @@ public class ServerConnection {
         clientSockets = new ArrayList<Socket>();
         myUserView = userViewIn;
 
-        clientSockets.add(clientSocketIn);
         serverConnects.add(this);
 
         myChat = new Chat(this);
@@ -162,9 +161,18 @@ public class ServerConnection {
 
         if (message.isDisconnectMessage()) {
             messageOut = message.getName() + " has disconnected.";
-            if (!isGroupChat) { 
+            if (!isGroupChat) {
                 JOptionPane.showMessageDialog(myChat, messageOut);
                 myUserView.removeChat(myChat);
+            } else {                
+                myChat.appendToPane("Server: ", messageOut,
+                        Color.BLACK);
+                String discOut = XmlHandler.writeXml("Server: ", "#000000", 
+                        messageOut);
+                for (PrintWriter out : outPut) {
+                    out.println(discOut);
+                }
+
             }
             removeClient(chatIn);
         } else {
@@ -206,6 +214,7 @@ public class ServerConnection {
 
     public final void addChatListener(Socket clientSocketIn) {
         try {
+            clientSockets.add(clientSocketIn);
             outPut.add(new PrintWriter(
                     clientSocketIn.getOutputStream(), true));
             ChatListener listener = new ChatListener(clientSocketIn, this);
