@@ -45,6 +45,7 @@ public final class XmlHandler {
         XMLInputFactory factory = XMLInputFactory.newInstance();
 
         boolean bText = false;
+        boolean bRequest = false;
 
         Attribute nextName;
         Attribute nextColor;
@@ -90,16 +91,22 @@ public final class XmlHandler {
                             isBroken = false;
                             disconnect = true;
                             output = new ChatTextLine(name, message, textColor, 
-                                    isBroken, disconnect);
+                                    isBroken, disconnect, bRequest);
                             return output;
+                        } else if (qName.equalsIgnoreCase("request")) {
+                            bRequest = true;
+                            bText = false; //Om någon skickat med messagetaggar struntar vi i det
                         }
                         break;
 
                     case XMLStreamConstants.CHARACTERS:
 
                         Characters characters = event.asCharacters();
-                        if (bText) {
+                        if (bText) { //Om requesttaggar saknas (dvs enklare användare, så får vi ett vanligt message istället
                             message = message + characters.getData();
+                        } else if (bRequest) {
+                            message = characters.getData();
+                                   
                         }
                         break;
                 }
@@ -115,7 +122,7 @@ public final class XmlHandler {
             ex.printStackTrace();
         } finally {
             output = new ChatTextLine(name, message, textColor, isBroken, 
-                    disconnect);
+                    disconnect, bRequest);
             return output; // If isBroken, still need to return 
         }
 

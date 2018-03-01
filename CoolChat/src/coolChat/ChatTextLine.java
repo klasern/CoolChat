@@ -18,14 +18,16 @@ public class ChatTextLine {
     private Color textColor;
     private Boolean brokenXml;
     private Boolean disconnetMessage;
+    private Boolean request;
 
     public ChatTextLine(String nameIn, String messageIn, Color colorIn, 
-            Boolean broken, Boolean disconnect) {
+            Boolean broken, Boolean disconnect, Boolean requestIn) {
         this.name = nameIn;
         this.message = messageIn;
         this.textColor = colorIn;
         this.brokenXml= broken;
         this.disconnetMessage = disconnect;
+        this.request = requestIn;
         
     }
 
@@ -48,5 +50,8 @@ public class ChatTextLine {
     public boolean isDisconnectMessage() {
         return this.disconnetMessage;
     }
-
+    
+    public boolean isRequest() {
+        return this.request;
+    }
 }
