@@ -24,9 +24,14 @@ public class ChatTextLine {
     private Boolean request;
     private Boolean replyNo;
 
-    
+    /**
+     * Create a ChatTextLine with default fields 
+     */
     public ChatTextLine() {
         this.brokenXml = false;
+        this.disconnectMessage = false;
+        this.request = false;
+        this.replyNo = false;
 
     }
 
