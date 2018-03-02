@@ -40,12 +40,6 @@ public final class XmlHandler {
         try {
             reader = inputFactory.createXMLStreamReader(new StringReader(xmlMessage));
             output = makeChatTextLine(reader);
-//            /* Check if all the necessary fields are filled for a message 
-//            (Name will never be null, since if no name found it is explicitly 
-//            stated)*/
-//            if(output.getMessage() == null || output.getColor() == null){
-//                output.setBrokenXml(true);
-//            }
         } catch (XMLStreamException ex) {
             ex.printStackTrace();
             output.setBrokenXml(true);
@@ -329,14 +323,6 @@ public final class XmlHandler {
      */
     public static String requestMessage(String message) {
         return "<request>" + message + "</request>";
-    }
-
-    public static void main(String[] args) {
-        String xml = "<message></message>";
-        ChatTextLine textline = XmlHandler.readXml(xml);
-        String msg = textline.getMessage();
-        System.out.println(msg);
-        System.out.println(textline.getName());
     }
 
 }
