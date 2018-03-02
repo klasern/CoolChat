@@ -169,7 +169,11 @@ public final class XmlHandler {
             color = "#000000";
         }
         /* convert RGB to color-object */
-        c = Color.decode(color);
+        try {
+            c = Color.decode(color);
+        } catch (Exception e) {
+            c = Color.BLACK;
+        }
         return c;
     }
 
