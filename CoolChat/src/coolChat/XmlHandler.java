@@ -21,17 +21,17 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-
 public final class XmlHandler {
 
     private XmlHandler() {
         throw new IllegalStateException("Do not instantiate this class.");
     }
-    
+
     /**
      * Reades the xmlMessage and creates a ChatTextLine with relevant info.
+     *
      * @param xmlMessage
-     * @return 
+     * @return
      */
     public static ChatTextLine readXml(String xmlMessage) {
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -53,7 +53,7 @@ public final class XmlHandler {
         }
         return output;
     }
-    
+
     /* Creates the ChatTextLine corresponding to the given xml */
     private static ChatTextLine makeChatTextLine(XMLStreamReader reader)
             throws XMLStreamException {
@@ -80,9 +80,9 @@ public final class XmlHandler {
          */
         throw new XMLStreamException("Premature end of file");
     }
-    
+
     /* Called when an unknown start tag is reached. */
-    private static void unknownStartTag(XMLStreamReader reader, 
+    private static void unknownStartTag(XMLStreamReader reader,
             String elementName) throws XMLStreamException {
         while (reader.hasNext()) {
             int eventType = reader.next();
@@ -96,7 +96,7 @@ public final class XmlHandler {
         }
         throw new XMLStreamException("Premature end of file");
     }
-    
+
     /* Called when a <message> start tag is reached. */
     private static ChatTextLine readMessage(XMLStreamReader reader)
             throws XMLStreamException {
@@ -109,17 +109,16 @@ public final class XmlHandler {
             name = "Name not found";
         }
         outputMsg.setName(name);
-        
+
         outputMsg.setReplyNo(false);
         outputMsg.setRequest(false);
-        
 
         while (reader.hasNext()) {
             int eventType = reader.next();
             switch (eventType) {
                 case XMLStreamReader.START_ELEMENT:
                     String elementName = reader.getLocalName();
-                    if (elementName.equals("text")) { 
+                    if (elementName.equals("text")) {
                         textOrDiscTag = true;
                         outputMsg.setTextColor(readColor(reader));
                         outputMsg.setMessage(readText(reader));
@@ -127,13 +126,13 @@ public final class XmlHandler {
                         outputMsg.setDisconnectMessage(false);
                     } else if (elementName.equals("disconnect")) {
                         textOrDiscTag = true;
-                        outputMsg.setDisconnectMessage(true); 
+                        outputMsg.setDisconnectMessage(true);
                     } else {
                         unknownStartTag(reader, elementName);
                     }
                     break;
                 case XMLStreamReader.END_ELEMENT:
-                    if(textOrDiscTag == false) {
+                    if (textOrDiscTag == false) {
                         throw new XMLStreamException("No text or disconnect "
                                 + "tag");
                     }
@@ -142,27 +141,30 @@ public final class XmlHandler {
         }
         throw new XMLStreamException("Premature end of file");
     }
-    
+
     /* Called when a <request> start tag is reached. */
-    private static ChatTextLine readRequest (XMLStreamReader reader)
+    private static ChatTextLine readRequest(XMLStreamReader reader)
             throws XMLStreamException {
         ChatTextLine outputMsg;
         outputMsg = new ChatTextLine();
         String reply;
         reply = reader.getAttributeValue(null, "reply");
         outputMsg.setRequest(true);
-        if (reply.equals("no")) {
-            outputMsg.setReplyNo(true);
-        }
-        else { 
+        if (reply != null) {
+            if (reply.equals("no")) {
+                outputMsg.setReplyNo(true);
+            } else {
+                outputMsg.setReplyNo(false);
+            }
+        } else {
             outputMsg.setReplyNo(false);
         }
         /* Read the messagetext */
         outputMsg.setMessage(readText(reader));
-        
+
         return outputMsg;
     }
-    
+
     /* Gets the color attribute from <text> start tag */
     private static Color readColor(XMLStreamReader reader) {
         Color c;
@@ -176,7 +178,7 @@ public final class XmlHandler {
         c = Color.decode(color);
         return c;
     }
-    
+
     /* Called when a <text> start tag is reached. */
     private static String readText(XMLStreamReader reader)
             throws XMLStreamException {
@@ -203,7 +205,7 @@ public final class XmlHandler {
         }
         throw new XMLStreamException("Premature end of file");
     }
-    
+
     /* Called when a <fetstil> start tag is reached. */
     private static String readBold(XMLStreamReader reader)
             throws XMLStreamException {
@@ -228,9 +230,9 @@ public final class XmlHandler {
         }
         throw new XMLStreamException("Premature end of file");
     }
-    
-   /* Called when a <kursiv> start tag is reached. */
-   private static String readItalic(XMLStreamReader reader)
+
+    /* Called when a <kursiv> start tag is reached. */
+    private static String readItalic(XMLStreamReader reader)
             throws XMLStreamException {
         StringBuilder message = new StringBuilder();
         while (reader.hasNext()) {
@@ -253,14 +255,16 @@ public final class XmlHandler {
         }
         throw new XMLStreamException("Premature end of file");
     }
-   /**
-    * Writes XML with the given name, color, and message text.
-    * @param name
-    * @param textColor
-    * @param text
-    * @return 
-    */
-   public static String writeXml(String name, String textColor, String text) {
+
+    /**
+     * Writes XML with the given name, color, and message text.
+     *
+     * @param name
+     * @param textColor
+     * @param text
+     * @return
+     */
+    public static String writeXml(String name, String textColor, String text) {
         String messageOut = null;
         try {
             StringWriter stringWriter = new StringWriter();
@@ -297,34 +301,37 @@ public final class XmlHandler {
         }
         return messageOut;
     }
-    
+
     /**
      * Creates disconnectmessage.
+     *
      * @param nameIn
-     * @return 
+     * @return
      */
     public static String disconnectMessage(String nameIn) {
         return "<message sender=\"" + nameIn + "\"><disconnect /></message>";
     }
-    
+
     /**
      * Creates "no" request tag pair.
-     * @return 
+     *
+     * @return
      */
     public static String requestNoMessage() {
         return "<request reply=\"no\"></request>";
     }
-    
+
     /**
      * Creates request tag.
+     *
      * @param message
-     * @return 
+     * @return
      */
-    public static String requestMessage(String message){
+    public static String requestMessage(String message) {
         return "<request>" + message + "</request>";
     }
 
-public static void main(String[] args) {
+    public static void main(String[] args) {
         String xml = "<message></message>";
         ChatTextLine textline = XmlHandler.readXml(xml);
         String msg = textline.getMessage();
