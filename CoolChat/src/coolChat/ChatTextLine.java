@@ -12,7 +12,7 @@ package coolChat;
 import java.awt.Color;
 
 /**
- * Contains information about text to chat. 
+ * Contains information about text to chat.
  */
 public class ChatTextLine {
 
@@ -20,72 +20,98 @@ public class ChatTextLine {
     private String message;
     private Color textColor;
     private Boolean brokenXml;
-    private Boolean disconnetMessage;
+    private Boolean disconnectMessage;
     private Boolean request;
+    private Boolean replyNo;
 
-    /**
-     * Constructor for information about chat.
-     * @param nameIn
-     * @param messageIn
-     * @param colorIn
-     * @param broken
-     * @param disconnect
-     * @param requestIn 
-     */
-    public ChatTextLine(String nameIn, String messageIn, Color colorIn, 
-            Boolean broken, Boolean disconnect, Boolean requestIn) {
-        this.name = nameIn;
-        this.message = messageIn;
-        this.textColor = colorIn;
-        this.brokenXml= broken;
-        this.disconnetMessage = disconnect;
-        this.request = requestIn;
-        
+    
+    public ChatTextLine() {
+        this.brokenXml = false;
+
+    }
+
+    public Boolean getReplyNo() {
+        return replyNo;
+    }
+
+    public void setReplyNo(Boolean replyNo) {
+        this.replyNo = replyNo;
     }
 
     /**
      * Returns name.
-     * @return 
+     *
+     * @return
      */
     public String getName() {
         return this.name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setTextColor(Color textColor) {
+        this.textColor = textColor;
+    }
+
+    public void setBrokenXml(Boolean brokenXml) {
+        this.brokenXml = brokenXml;
+    }
+
+    public void setDisconnectMessage(Boolean disconnetMessage) {
+        this.disconnectMessage = disconnetMessage;
+    }
+
+    public void setRequest(Boolean request) {
+        this.request = request;
+    }
+
     /**
      * Returns message.
-     * @return 
+     *
+     * @return
      */
     public String getMessage() {
         return this.message;
     }
-    
+
     /**
      * Returns color.
-     * @return 
+     *
+     * @return
      */
-    public Color getColor(){
+    public Color getColor() {
         return this.textColor;
     }
-    
+
     /**
      * Returns if xml is broken.
-     * @return 
+     *
+     * @return
      */
-    public boolean isBroken(){
+    public boolean isBroken() {
         return this.brokenXml;
     }
-    
+
     /**
      * Returns disconnect message;
-     * @return 
+     *
+     * @return
      */
     public boolean isDisconnectMessage() {
-        return this.disconnetMessage;
+        return this.disconnectMessage;
     }
-    
+
     /**
-     * Returns request message.
-     * @return 
+     * Returns request message. Used to see if message contains a
+     * requesttagpair.
+     *
+     * @return
      */
     public boolean isRequest() {
         return this.request;

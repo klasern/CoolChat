@@ -123,7 +123,7 @@ public class ClientConnection {
         } else if (!messageIn.isBroken()) {
             myChat.appendToPane(messageIn.getName(), messageIn.getMessage(),
                     messageIn.getColor());
-        } else {
+        } else { // Only happens when the message contained broken XML
             myChat.appendToPane("Server", "Något fel med xmlen.",
                     Color.BLACK);
         }

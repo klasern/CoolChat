@@ -5,130 +5,262 @@
  */
 package coolChat;
 
-import java.awt.Color;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.Iterator;
-import java.util.jar.Attributes;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
-
 /**
  *
  * @author Anders
  */
+import java.awt.Color;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.HashSet;
+import java.util.Set;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+
+
 public final class XmlHandler {
 
     private XmlHandler() {
         throw new IllegalStateException("Do not instantiate this class.");
     }
-
+    
+    /**
+     * Reades the xmlMessage and creates a ChatTextLine with relevant info.
+     * @param xmlMessage
+     * @return 
+     */
     public static ChatTextLine readXml(String xmlMessage) {
-        String name = null;
-        String message = "";
-        String color = null;
-        Boolean isBroken = true;
-        Boolean disconnect = false;
-        Color textColor = null;
-        ChatTextLine output = null;
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-
-        boolean bText = false;
-        boolean bRequest = false;
-
-        Attribute nextName;
-        Attribute nextColor;
-
+        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        XMLStreamReader reader = null;
+        ChatTextLine output = new ChatTextLine();
         try {
-            XMLEventReader eventReader
-                    = factory.createXMLEventReader(new StringReader(xmlMessage));
-
-            while (eventReader.hasNext()) {
-                XMLEvent event = eventReader.nextEvent();
-
-                switch (event.getEventType()) {
-                    case XMLStreamConstants.START_ELEMENT:
-                        StartElement startElement = event.asStartElement();
-                        String qName = startElement.getName().getLocalPart();
-                        if (qName.equalsIgnoreCase("message")) {
-                            isBroken = false;
-                            Iterator<Attribute> attributes
-                                    = startElement.getAttributes();
-                            while (name == null && attributes.hasNext()) {
-                                nextName = attributes.next();
-                                if (nextName.getName().toString()
-                                        .equals("sender")) {
-                                    name = nextName.getValue();
-                                }
-                            }
-
-                        } else if (qName.equalsIgnoreCase("text")) {
-                            Iterator<Attribute> attributes
-                                    = startElement.getAttributes();
-                            while (color == null && attributes.hasNext()) {
-                                nextColor = attributes.next();
-                                if (nextColor.getName().toString() //Stilguiden??
-                                        .equals("color")) {
-                                    color = nextColor.getValue();
-                                }
-                            }
-
-                            bText = true;
-                        } else if (qName.equalsIgnoreCase("disconnect")) {
-                            message = "";
-                            textColor = Color.BLACK;
-                            isBroken = false;
-                            disconnect = true;
-                            output = new ChatTextLine(name, message, textColor, 
-                                    isBroken, disconnect, bRequest);
-                            return output;
-                        } else if (qName.equalsIgnoreCase("request")) {
-                            bRequest = true;
-                            bText = false; //Om någon skickat med messagetaggar struntar vi i det
-                        }
-                        break;
-
-                    case XMLStreamConstants.CHARACTERS:
-
-                        Characters characters = event.asCharacters();
-                        if (bText) { //Om requesttaggar saknas (dvs enklare användare, så får vi ett vanligt message istället
-                            message = message + characters.getData();
-                        } else if (bRequest) {
-                            message = characters.getData();
-                                   
-                        }
-                        break;
-                }
-
-            }
-            /* convert RGB to color-object */
-            textColor = Color.decode(color);
+            reader = inputFactory.createXMLStreamReader(new StringReader(xmlMessage));
+            output = makeChatTextLine(reader);
+//            /* Check if all the necessary fields are filled for a message 
+//            (Name will never be null, since if no name found it is explicitly 
+//            stated)*/
+//            if(output.getMessage() == null || output.getColor() == null){
+//                output.setBrokenXml(true);
+//            }
         } catch (XMLStreamException ex) {
-            name = "";
-            message = "";
-            textColor = Color.BLACK;
-            isBroken = true;
             ex.printStackTrace();
-        } finally {
-            output = new ChatTextLine(name, message, textColor, isBroken, 
-                    disconnect, bRequest);
-            return output; // If isBroken, still need to return 
+            output.setBrokenXml(true);
+            return output;
         }
-
+        return output;
     }
+    
+    /* Creates the ChatTextLine corresponding to the given xml */
+    private static ChatTextLine makeChatTextLine(XMLStreamReader reader)
+            throws XMLStreamException {
 
-    public static String writeXml(String name, String textColor, String text) {
+        while (reader.hasNext()) {
+            int eventType = reader.next();
+            switch (eventType) {
+                case XMLStreamReader.START_ELEMENT:
+                    String elementName = reader.getLocalName();
+                    if (elementName.equals("message")) {
+                        return readMessage(reader);
+                    } else if (elementName.equals("request")) {
+                        return readRequest(reader);
+                    } else {
+                        unknownStartTag(reader, elementName);
+                    }
+                    break;
+                case XMLStreamReader.END_ELEMENT:
+                    break;
+            }
+        }
+        /* Only reached if reader is empty and never found a message or request
+        tag.
+         */
+        throw new XMLStreamException("Premature end of file");
+    }
+    
+    /* Called when an unknown start tag is reached. */
+    private static void unknownStartTag(XMLStreamReader reader, 
+            String elementName) throws XMLStreamException {
+        while (reader.hasNext()) {
+            int eventType = reader.next();
+            switch (eventType) {
+                case XMLStreamReader.END_ELEMENT:
+                    String endTagName = reader.getLocalName();
+                    if (endTagName.equals(elementName)) {
+                        return;
+                    }
+            }
+        }
+        throw new XMLStreamException("Premature end of file");
+    }
+    
+    /* Called when a <message> start tag is reached. */
+    private static ChatTextLine readMessage(XMLStreamReader reader)
+            throws XMLStreamException {
+        ChatTextLine outputMsg = new ChatTextLine();
+        String name;
+        boolean textOrDiscTag = false;
+
+        name = reader.getAttributeValue(null, "sender");
+        if (name == null) {
+            name = "Name not found";
+        }
+        outputMsg.setName(name);
+        
+        outputMsg.setReplyNo(false);
+        outputMsg.setRequest(false);
+        
+
+        while (reader.hasNext()) {
+            int eventType = reader.next();
+            switch (eventType) {
+                case XMLStreamReader.START_ELEMENT:
+                    String elementName = reader.getLocalName();
+                    if (elementName.equals("text")) { 
+                        textOrDiscTag = true;
+                        outputMsg.setTextColor(readColor(reader));
+                        outputMsg.setMessage(readText(reader));
+                        /* If text, it's not disconnect */
+                        outputMsg.setDisconnectMessage(false);
+                    } else if (elementName.equals("disconnect")) {
+                        textOrDiscTag = true;
+                        outputMsg.setDisconnectMessage(true); 
+                    } else {
+                        unknownStartTag(reader, elementName);
+                    }
+                    break;
+                case XMLStreamReader.END_ELEMENT:
+                    if(textOrDiscTag == false) {
+                        throw new XMLStreamException("No text or disconnect "
+                                + "tag");
+                    }
+                    return outputMsg;
+            }
+        }
+        throw new XMLStreamException("Premature end of file");
+    }
+    
+    /* Called when a <request> start tag is reached. */
+    private static ChatTextLine readRequest (XMLStreamReader reader)
+            throws XMLStreamException {
+        ChatTextLine outputMsg;
+        outputMsg = new ChatTextLine();
+        String reply;
+        reply = reader.getAttributeValue(null, "reply");
+        outputMsg.setRequest(true);
+        if (reply.equals("no")) {
+            outputMsg.setReplyNo(true);
+        }
+        else { 
+            outputMsg.setReplyNo(false);
+        }
+        /* Read the messagetext */
+        outputMsg.setMessage(readText(reader));
+        
+        return outputMsg;
+    }
+    
+    /* Gets the color attribute from <text> start tag */
+    private static Color readColor(XMLStreamReader reader) {
+        Color c;
+        String color;
+        color = reader.getAttributeValue(null, "color");
+        /* If no color chosen, use black text. */
+        if (color == null) {
+            color = "#000000";
+        }
+        /* convert RGB to color-object */
+        c = Color.decode(color);
+        return c;
+    }
+    
+    /* Called when a <text> start tag is reached. */
+    private static String readText(XMLStreamReader reader)
+            throws XMLStreamException {
+        StringBuilder message = new StringBuilder();
+        while (reader.hasNext()) {
+            int eventType = reader.next();
+            switch (eventType) {
+                case XMLStreamReader.CHARACTERS:
+                    message.append(reader.getText());
+                    break;
+                case XMLStreamReader.START_ELEMENT:
+                    String elementName = reader.getLocalName();
+                    if (elementName.equals("fetstil")) {
+                        message.append(readBold(reader));
+                    } else if (elementName.equals("kursiv")) {
+                        message.append(readItalic(reader));
+                    } else {
+                        unknownStartTag(reader, elementName);
+                    }
+                    break;
+                case XMLStreamReader.END_ELEMENT:
+                    return message.toString();
+            }
+        }
+        throw new XMLStreamException("Premature end of file");
+    }
+    
+    /* Called when a <fetstil> start tag is reached. */
+    private static String readBold(XMLStreamReader reader)
+            throws XMLStreamException {
+        StringBuilder message = new StringBuilder();
+        while (reader.hasNext()) {
+            int eventType = reader.next();
+            switch (eventType) {
+                case XMLStreamReader.CHARACTERS:
+                    message.append(reader.getText());
+                    break;
+                case XMLStreamReader.START_ELEMENT:
+                    String elementName = reader.getLocalName();
+                    if (elementName.equals("kursiv")) {
+                        message.append(readItalic(reader));
+                    } else {
+                        unknownStartTag(reader, elementName);
+                    }
+                    break;
+                case XMLStreamReader.END_ELEMENT:
+                    return message.toString();
+            }
+        }
+        throw new XMLStreamException("Premature end of file");
+    }
+    
+   /* Called when a <kursiv> start tag is reached. */
+   private static String readItalic(XMLStreamReader reader)
+            throws XMLStreamException {
+        StringBuilder message = new StringBuilder();
+        while (reader.hasNext()) {
+            int eventType = reader.next();
+            switch (eventType) {
+                case XMLStreamReader.CHARACTERS:
+                    message.append(reader.getText());
+                    break;
+                case XMLStreamReader.START_ELEMENT:
+                    String elementName = reader.getLocalName();
+                    if (elementName.equals("fetstil")) {
+                        message.append(readBold(reader));
+                    } else {
+                        unknownStartTag(reader, elementName);
+                    }
+                    break;
+                case XMLStreamReader.END_ELEMENT:
+                    return message.toString();
+            }
+        }
+        throw new XMLStreamException("Premature end of file");
+    }
+   /**
+    * Writes XML with the given name, color, and message text.
+    * @param name
+    * @param textColor
+    * @param text
+    * @return 
+    */
+   public static String writeXml(String name, String textColor, String text) {
         String messageOut = null;
         try {
             StringWriter stringWriter = new StringWriter();
@@ -192,20 +324,12 @@ public final class XmlHandler {
         return "<request>" + message + "</request>";
     }
 
-    public static void main(String[] args) {
-//        //String message = "<name attribute=\"value\">content</name>";
-//        //String message = "<class><student rollno = \"393\"><firstname>dinkar</firstname><lastname>kad</lastname><nickname>dinkar</nickname><marks>85</marks></student><student rollno = \"493\"><firstname>Vaneet</firstname><lastname>Gupta</lastname><nickname>vinni</nickname><marks>95</marks></student><student rollno = \"593\"><firstname>jasvir</firstname><lastname>singn</lastname><nickname>jazz</nickname><marks>90</marks></student></class>";
-          String message = "<message extra=\"plz ignore\" sender=\"Anders\" ><disconnect /><text exxxtra=\"plz iiiignore\" color=\"#000000\">Hej &amp; <fetstil>på</fetstil> dig</text></message>";
-//        //XmlHandler.readXml(message);
-        //String message = "<?xml version=\"1.0\" ?><?xml version=\"1.0\" ?><message sender=\"Anders\"><text color=\"#000000\">Hej på dig</text></message>";
-//        String message = writeXml("Anders", "#RRGGBB", "Hej på dig");
-//        String message1 = writeXml("Anders", "#RRGGBB", "Hej dddpå dig");
-//        String message2 = writeXml("Anders", "#RRGGBB", "Hej på asdaddig");
-//        System.out.println(message);
-//        System.out.println(message1);
-//        System.out.println(message2);
-//        System.out.println(readXml(message));
-          System.out.println(readXml(message).getColor());
-
+public static void main(String[] args) {
+        String xml = "<message></message>";
+        ChatTextLine textline = XmlHandler.readXml(xml);
+        String msg = textline.getMessage();
+        System.out.println(msg);
+        System.out.println(textline.getName());
     }
+
 }
