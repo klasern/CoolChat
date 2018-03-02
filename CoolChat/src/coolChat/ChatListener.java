@@ -90,10 +90,8 @@ public class ChatListener extends Thread {
         while (true) {
             try {
                 message = in.readLine();
-                System.out.println(message);
                 if (message == null) {
-                    System.out.println("Client disconnect!");
-                    break;       //STÄNGER NER NÄR EN STÄNGER NER
+                    break;     // while loop stops if no more messages
                 }
                 if (server != null) {
                     server.sendMessage(message, this);
