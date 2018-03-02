@@ -99,7 +99,6 @@ public class ChatListener extends Thread {
                     client.writeMessage(message);
                 }
             } catch (IOException e) {
-                System.out.println("readLine failed: " + e);
                 break;
             }
         }
