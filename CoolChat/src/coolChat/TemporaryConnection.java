@@ -62,8 +62,6 @@ public class TemporaryConnection extends Thread {
         ChatTextLine checkMessage;
         String acceptString;
         boolean advancedClient;
-        
-        JPanel myPanel = new JPanel();
 
         String[] options = {"Add to groupchat", "Create new chat",
             "Decline connection"};

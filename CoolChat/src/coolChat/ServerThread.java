@@ -39,17 +39,28 @@ public class ServerThread extends Thread {
     /**
      * Used to get a correct port.
      */
-    private boolean startServerSocket() {
+    private boolean startServerSocket() throws AbortException {
 
         /*When cancel or close window is pressed, the program closes.*/
         try {
-            port = Integer.parseInt(
-                    JOptionPane.showInputDialog(myUserView,
-                            "What port to listen to? 2000-60000"));
+            String input = JOptionPane.showInputDialog(myUserView,
+                    "What port to listen to? (2000 to 60000)");
+            /* Input is null if user cancels. Shut down program.
+            User has to pick a port.
+            */
+            if (input == null) {
+                throw new AbortException("Startup aborted by user.");
+            }
+            port = Integer.parseInt(input);
+            if (port < 2000 || port > 60000) {
+                return true;
+            }
+            
             serverSocket = new ServerSocket(port);
+
         } catch (IOException ex) {
             return true;
-        } catch (NumberFormatException nfe) {            
+        } catch (NumberFormatException nfe) {
             return true;
         }
 
@@ -60,12 +71,16 @@ public class ServerThread extends Thread {
      * Ask which port to listen to and listen to that port.
      */
     public void run() {
-        
+
         boolean startUp = true;
 
         /*Ask user for port until it is valid.*/
         while (startUp) {
-            startUp = startServerSocket();
+            try {
+                startUp = startServerSocket();
+            } catch (AbortException ex) {
+                System.exit(0);
+            }
         }
 
         /*Listen to connections.*/
@@ -76,7 +91,7 @@ public class ServerThread extends Thread {
                 Thread temporaryThread = new TemporaryConnection(clientSocket,
                         myUserView);
                 temporaryThread.start();
-            } catch (IOException e) {                
+            } catch (IOException e) {
                 System.out.println("Accept failed: " + port);
             }
         }

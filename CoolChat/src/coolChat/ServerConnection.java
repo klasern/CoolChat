@@ -107,9 +107,9 @@ public class ServerConnection {
                 JOptionPane.showMessageDialog(myChat, messageOut);
                 myUserView.removeChat(myChat);
             } else {
-                myChat.appendToPane("Server: ", messageOut,
+                myChat.appendToPane("Server", messageOut,
                         Color.BLACK);
-                String discOut = XmlHandler.writeXml("Server: ", "#000000",
+                String discOut = XmlHandler.writeXml("Server", "#000000",
                         messageOut);
                 for (PrintWriter out : outPut) {
                     out.println(discOut);
